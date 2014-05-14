@@ -1,0 +1,24 @@
+{
+  "name": "angular-d3-charts",
+  "version": "0.1.0",
+  "homepage": "https://github.com/elesdoar/angular-d3-charts",
+  "author": "https://github.com/elesdoar/angular-d3-charts/graphs/contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elesdoar/angular-d3-charts"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "devDependencies": {
+    "matchdep": "*",
+    "grunt": "~0.4.2",
+    "grunt-contrib-connect": "*",
+    "grunt-contrib-jshint": "~0.7.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-open": "*"
+  }
+}

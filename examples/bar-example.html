@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html ng-app="demoapp">
+  <head>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../bower_components/d3/d3.min.js"></script>
+    <script src="../dist/angular-d3-charts.js"></script>
+    <script>
+        var app = angular.module("demoapp", ['angular-d3-charts']);
+        app.controller("DemoController", [ "$scope", function($scope) {
+            // Nothing here!
+        }]);
+    </script>
+  </head>
+  <body ng-controller="DemoController">
+    <a3bar width="640px" height="480px"></a3bar>
+  </body>
+</html>
