@@ -9,10 +9,23 @@
         var app = angular.module("demoapp", ['angular-d3-charts']);
         app.controller("DemoController", [ "$scope", function($scope) {
             // Nothing here!
+            angular.extend($scope, {
+              options: {
+                axis: {
+                  stroke: 'red',                  
+                },
+                x: {
+                  //tickSize: 0,
+                  position: 'top',
+                  orient: 'top',
+                  label: 'Store'
+                }
+              }
+            });
         }]);
     </script>
   </head>
   <body ng-controller="DemoController">
-    <a3bar width="640px" height="480px"></a3bar>
+    <a3bar width="300px" height="300px" options="options"></a3bar>
   </body>
 </html>

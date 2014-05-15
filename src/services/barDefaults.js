@@ -1,9 +1,64 @@
-angular.module("angular-d3-charts").factory('barDefaults', function (d3Helpers) {
+angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) {
 	function _getDefaults() {
 		return {
 			width: 300,
 			heigth: 250,
-			zoom: true
+			zoom: true,
+			margin: {
+				left: 10,
+				right: 10,
+				top: 10,
+				bottom: 10
+			},
+			legend: {
+				show: true,
+				width: 120
+			},
+			series: ['A', 'B', 'C', 'D'],
+			x: {
+				domain: ['Fruits', 'Vegetables', 'Meet'],
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'bottom',
+				position: 'bottom',
+				key: 'x',
+				label: 'x',
+				ticks: 5,
+				tickSubdivide: 4
+			},
+			y: {
+				scale: 'linear',
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'left',
+				position: 'left',
+				key: 'y',
+				label: 'y',
+				ticks: 5,
+				tickSubdivide: 4
+			},
+			timeFormat: '%d-%m-%Y',
+			fontFamily: 'Arial',
+			fontSize: '0.75em',
+			axis: {
+				stroke: '#000',
+				fill: '#000'
+			},
+			defaultData: [{
+				x: 'Fruits',
+				y: [ 54, 0, 879 ],
+				tooltip: 'Fruits tooltip'
+			}, {
+				x: 'Vegetables',
+				y: [ 12, 34, 15 ],
+				tooltip: 'Vegetables tooltip'
+			}, {
+				x: 'Meet',
+				y: [ 54, 432, 234 ],
+				tooltip: 'Meet tooltip'
+			}],
+			showDefaultData: true,
+			locale: null
 		};
 	}
 
@@ -21,10 +76,8 @@ angular.module("angular-d3-charts").factory('barDefaults', function (d3Helpers) 
 		getCreationDefaults: function (scopeId) {
 			var d = this.getDefaults(scopeId);
 
-			var barDefaults = {
-				zoom: d.zoom
-			};
-
+			var barDefaults = {};
+			angular.extend(barDefaults, d);
 			return barDefaults;
 		},
 
@@ -35,6 +88,30 @@ angular.module("angular-d3-charts").factory('barDefaults', function (d3Helpers) 
 				newDefaults.width = isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
 				newDefaults.heigth = isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
 				newDefaults.zoom = isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;
+				newDefaults.timeFormat = isDefined(userDefaults.timeFormat) ?  userDefaults.timeFormat : newDefaults.timeFormat;
+				newDefaults.fontFamily = isDefined(userDefaults.fontFamily) ?  userDefaults.fontFamily : newDefaults.fontFamily;
+				newDefaults.fontSize = isDefined(userDefaults.fontSize) ?  userDefaults.fontSize : newDefaults.fontSize;
+				newDefaults.showDefaultData = isDefined(userDefaults.showDefaultData) ?  userDefaults.showDefaultData : newDefaults.showDefaultData;
+				newDefaults.locale = isDefined(userDefaults.locale) ?  userDefaults.locale : newDefaults.locale;
+				
+				if(isDefined(userDefaults.margin)) {
+					angular.extend(newDefaults.margin, userDefaults.margin);
+				}
+				if(isDefined(userDefaults.legend)) {
+					angular.extend(newDefaults.legend, userDefaults.legend);
+				}
+
+				if(isDefined(userDefaults.x)) {
+					angular.extend(newDefaults.x, userDefaults.x);
+				}
+
+				if(isDefined(userDefaults.axis)) {
+					angular.extend(newDefaults.axis, userDefaults.axis);
+				}
+
+				if(isDefined(newDefaults.defaultData)) {
+					angular.extend(newDefaults.defaultData, newDefaults.defaultData);
+				}
 			}
 
 			var barId = obtainEffectiveChartId(defaults, scopeId);

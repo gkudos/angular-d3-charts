@@ -1,4 +1,4 @@
-angular.module("angular-d3-charts").factory('d3Helpers', function ($log) {
+angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 	function _obtainEffectiveChartId(d, chartId) {
 		var id, i;
 		if (!angular.isDefined(chartId)) {
@@ -9,9 +9,9 @@ angular.module("angular-d3-charts").factory('d3Helpers', function ($log) {
 					}
 				}
 			} else if (Object.keys(d).length === 0) {
-				id = "main";
+				id = 'main';
 			} else {
-				$log.error("[AngularJS - D3] - You have more than 1 object on the DOM, you must provide the object ID");
+				$log.error('[AngularJS - D3] - You have more than 1 object on the DOM, you must provide the object ID');
 			}
 		} else {
 			id = chartId;
@@ -74,6 +74,17 @@ angular.module("angular-d3-charts").factory('d3Helpers', function ($log) {
 				$scope.$apply(fn);
 			}
 		},
+
+		getRandomString: function(length) {
+			var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+			var string_length = length || 8;
+			var randomstring = '';
+			for (var i = 0; i < string_length; i++) {
+				var rnum = Math.floor(Math.random() * chars.length);
+				randomstring += chars.substring(rnum, rnum+1);
+			}
+			return randomstring;
+        },
 
 		obtainEffectiveChartId: _obtainEffectiveChartId
 	};

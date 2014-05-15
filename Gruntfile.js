@@ -22,6 +22,7 @@ module.exports = function(grunt) {
           'src/directives/bar.js',
           'src/services/d3Helpers.js',
           'src/services/barDefaults.js',
+          'src/services/barHelpers.js',
           'src/services/svgHelpers.js'
         ],
         dest: 'dist/<%= pkg.name %>.js'
@@ -78,6 +79,8 @@ module.exports = function(grunt) {
     },
     jshint: {
       options: {
+        browser: true,
+        indent: 4,
         curly: true,
         eqeqeq: true,
         immed: true,
@@ -89,6 +92,8 @@ module.exports = function(grunt) {
         unused: true,
         boss: true,
         eqnull: true,
+        smarttabs: true,
+        quotmark: 'single',
         globals: {
           angular: false,
           d3: false

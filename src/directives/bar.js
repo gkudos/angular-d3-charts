@@ -1,20 +1,23 @@
-angular.module("angular-d3-charts", []).directive('a3bar', function ($log, d3Helpers, barDefaults) {
+angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Helpers, svgHelpers, barHelpers, barDefaults) {
 	return {
-		restrict: "EA",
+		restrict: 'EA',
 		replace: true,
 		scope: {
+			options: '=options'
 		},
 		template: '<div class="angular-a3bar"></div>',
 		controller: function($scope) {
-			$log.info("[Angular - D3] Bar scope controller", $scope);
+			$log.info('[Angular - D3] Bar scope controller', $scope);
 		},
 		link: function(scope, element, attrs) {
+			scope.container = element;
 			var isDefined = d3Helpers.isDefined,
-				defaults = barDefaults.setDefaults(scope.defaults, attrs.id);
+				options = barDefaults.setDefaults(scope.options, attrs.id);
 
 			// Set width and height if they are defined
-			var w = isDefined(attrs.width)? attrs.width:defaults.width,
-				h = isDefined(attrs.height)? attrs.height:defaults.height;
+			var w = isDefined(attrs.width)? attrs.width:options.width,
+				h = isDefined(attrs.height)? attrs.height:options.height,
+				svg;
 			
 			if (isNaN(w)) {
 				element.css('width', w);
@@ -27,10 +30,20 @@ angular.module("angular-d3-charts", []).directive('a3bar', function ($log, d3Hel
 			} else {
 				element.css('height', h + 'px');
 			}
-			
 
-			defaults.width = element.width();
-			defaults.height = element.height();
+
+			options.width = element.width();
+			options.height = element.height();
+
+			barHelpers.setXScale(scope, options);
+			barHelpers.setYScale(scope, options);
+			svg = svgHelpers.addSVG(scope, element.get(0), options);
+
+			element.width(options.containerWidth);
+			element.height(options.containerHeight);
+
+			barHelpers.addAxis(scope, options);
+			svgHelpers.updateStyles(scope, options);
 		}
 	};
 });
