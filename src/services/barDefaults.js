@@ -105,6 +105,10 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 					angular.extend(newDefaults.x, userDefaults.x);
 				}
 
+				if(isDefined(userDefaults.y)) {
+					angular.extend(newDefaults.y, userDefaults.y);
+				}
+
 				if(isDefined(userDefaults.axis)) {
 					angular.extend(newDefaults.axis, userDefaults.axis);
 				}
