@@ -3,7 +3,8 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 		restrict: 'EA',
 		replace: true,
 		scope: {
-			options: '=options'
+			options: '=options',
+			data: '=data'
 		},
 		template: '<div class="angular-a3bar"></div>',
 		controller: function($scope) {
@@ -16,8 +17,7 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 
 			// Set width and height if they are defined
 			var w = isDefined(attrs.width)? attrs.width:options.width,
-				h = isDefined(attrs.height)? attrs.height:options.height,
-				svg;
+				h = isDefined(attrs.height)? attrs.height:options.height;
 			
 			if (isNaN(w)) {
 				element.css('width', w);
@@ -37,13 +37,18 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 
 			barHelpers.setXScale(scope, options);
 			barHelpers.setYScale(scope, options);
-			svg = svgHelpers.addSVG(scope, element.get(0), options);
+			if(isDefined(options.zoom) && options.zoom) {
+				svgHelpers.addZoomBehaviour(scope, barHelpers.zoomBehaviour);
+			}
+			svgHelpers.addSVG(scope, element.get(0), options);
 
 			element.width(options.containerWidth);
 			element.height(options.containerHeight);
 
 			barHelpers.addAxis(scope, options);
 			svgHelpers.updateStyles(scope, options);
+
+			barHelpers.updateData(scope, options);
 		}
 	};
 });

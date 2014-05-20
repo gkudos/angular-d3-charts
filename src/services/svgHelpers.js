@@ -1,4 +1,4 @@
-angular.module('angular-d3-charts').factory('svgHelpers', function (d3Helpers) {
+angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Helpers) {
 	return {
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
@@ -24,6 +24,22 @@ angular.module('angular-d3-charts').factory('svgHelpers', function (d3Helpers) {
 				.attr('height', options.height - 20);
 			scope.svg = svg;
 			return svg;
+		},
+
+		addZoomBehaviour: function(scope, behavior) {
+			if(!d3Helpers.isDefined(scope.x)) {
+				$log.warn('[Angular - D3] x scale is not defined, unable set zoom behavior');
+				return;
+			}
+			if(!d3Helpers.isDefined(scope.y)) {
+				$log.warn('[Angular - D3] y scale is not defined, unable set zoom behavior');
+				return;
+			}
+			scope.zoom = d3.behavior.zoom()
+				.x(scope.x)
+				.y(scope.y)
+				.scaleExtent([0.5, 100])
+				.on('zoom', behavior);
 		},
 
 		updateStyles: function(scope, options) {

@@ -86,6 +86,16 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			return randomstring;
         },
 
+        getRandomColor: function() {
+			// random values between 0 and 255, these are the 3 colour values
+			var r = Math.floor(Math.random()*256);
+			var g = Math.floor(Math.random()*256);
+			var b = Math.floor(Math.random()*256);
+			
+			// puts the hex value inside this element (e is a jquery object)
+			return d3.rgb(r,g,b); 
+		},
+
 		obtainEffectiveChartId: _obtainEffectiveChartId
 	};
 });

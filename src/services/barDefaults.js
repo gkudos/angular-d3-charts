@@ -16,7 +16,6 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			},
 			series: ['A', 'B', 'C', 'D'],
 			x: {
-				domain: ['Fruits', 'Vegetables', 'Meet'],
 				tickFormat: null,
 				tickSize: 6,
 				orient: 'bottom',
@@ -45,14 +44,17 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				fill: '#000'
 			},
 			defaultData: [{
+				id: 1,
 				x: 'Fruits',
 				y: [ 54, 0, 879 ],
 				tooltip: 'Fruits tooltip'
 			}, {
+				id: 2,
 				x: 'Vegetables',
 				y: [ 12, 34, 15 ],
 				tooltip: 'Vegetables tooltip'
 			}, {
+				id: 3,
 				x: 'Meet',
 				y: [ 54, 432, 234 ],
 				tooltip: 'Meet tooltip'

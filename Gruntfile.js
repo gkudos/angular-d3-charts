@@ -41,7 +41,8 @@ module.exports = function(grunt) {
       },
       devserver: {
         options: {
-          port: 8888
+          port: 8888,
+          livereload: true
         }
       },
       testserver: {
@@ -61,7 +62,8 @@ module.exports = function(grunt) {
 
     open: {
       devserver: {
-        path: 'http://localhost:8888'
+        path: 'http://localhost:8888/examples',
+        app: 'firefox'
       },
       coverage: {
         path: 'http://localhost:5555'
@@ -97,7 +99,8 @@ module.exports = function(grunt) {
         globals: {
           angular: false,
           d3: false
-        }
+        },
+        reporter: require('jshint-stylish')
       },
       source: {
         src: ['src/directives/*.js', 'src/services/*.js']
@@ -131,6 +134,9 @@ module.exports = function(grunt) {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
+      },
+      tests: {
+        src: ['test/unit/*.js', 'test/e2e/*.js'],
       }
     }
   });
