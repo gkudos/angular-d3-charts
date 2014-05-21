@@ -20,6 +20,7 @@ module.exports = function(grunt) {
       dist: {
         src: [
           'src/directives/bar.js',
+					'src/directives/oneAxisBar.js',
           'src/services/d3Helpers.js',
           'src/services/barDefaults.js',
           'src/services/barHelpers.js',
@@ -72,7 +73,8 @@ module.exports = function(grunt) {
 
     uglify: {
       options: {
-        banner: '<%= banner %>'
+        banner: '<%= banner %>',
+				report: 'gzip'
       },
       dist: {
         src: '<%= concat.dist.dest %>',
@@ -125,7 +127,7 @@ module.exports = function(grunt) {
         files: ['src/**/*.js'],
         tasks: [
           'jshint:source',
-          'concat:dist',          
+          'concat:dist',
           'uglify',
           //'test:unit',
           //'concat:license'

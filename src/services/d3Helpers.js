@@ -20,6 +20,33 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		return id;
 	}
 
+	function _getCommonDefaults() {
+		return {
+			width: 300,
+			heigth: 250,
+			zoom: true,
+			margin: {
+				left: 10,
+				right: 10,
+				top: 10,
+				bottom: 10
+			},
+			legend: {
+				show: true,
+				width: 120
+			},
+			timeFormat: '%d-%m-%Y',
+			fontFamily: 'Arial',
+			fontSize: '0.75em',
+			axis: {
+				stroke: '#000',
+				fill: '#000'
+			},
+			showDefaultData: true,
+			locale: null
+		};
+	}
+
 	return {
 		//Determine if a reference is {}
 		isEmpty: function(value) {
@@ -75,6 +102,32 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			}
 		},
 
+		getCommonDefaults: _getCommonDefaults,
+
+		setDefaults: function(newDefaults, userDefaults) {
+			if (this.isDefined(userDefaults)) {
+				newDefaults.width = this.isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
+				newDefaults.heigth = this.isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
+				newDefaults.zoom = this.isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;
+				newDefaults.timeFormat = this.isDefined(userDefaults.timeFormat) ?  userDefaults.timeFormat : newDefaults.timeFormat;
+				newDefaults.fontFamily = this.isDefined(userDefaults.fontFamily) ?  userDefaults.fontFamily : newDefaults.fontFamily;
+				newDefaults.fontSize = this.isDefined(userDefaults.fontSize) ?  userDefaults.fontSize : newDefaults.fontSize;
+				newDefaults.showDefaultData = this.isDefined(userDefaults.showDefaultData) ?  userDefaults.showDefaultData : newDefaults.showDefaultData;
+				newDefaults.locale = this.isDefined(userDefaults.locale) ?  userDefaults.locale : newDefaults.locale;
+
+				if(this.isDefined(userDefaults.margin)) {
+					angular.extend(newDefaults.margin, userDefaults.margin);
+				}
+				if(this.isDefined(userDefaults.legend)) {
+					angular.extend(newDefaults.legend, userDefaults.legend);
+				}
+
+				if(this.isDefined(userDefaults.axis)) {
+					angular.extend(newDefaults.axis, userDefaults.axis);
+				}
+			}
+		},
+
 		getRandomString: function(length) {
 			var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 			var string_length = length || 8;
@@ -91,9 +144,9 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			var r = Math.floor(Math.random()*256);
 			var g = Math.floor(Math.random()*256);
 			var b = Math.floor(Math.random()*256);
-			
+
 			// puts the hex value inside this element (e is a jquery object)
-			return d3.rgb(r,g,b); 
+			return d3.rgb(r,g,b);
 		},
 
 		obtainEffectiveChartId: _obtainEffectiveChartId

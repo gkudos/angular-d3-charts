@@ -5,7 +5,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 
 	var _getDataFromScope = function(scope, options) {
 		var data = null;
-		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData && 
+		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
 			!d3Helpers.isUndefinedOrEmpty(options.defaultData)) {
 			data = options.defaultData;
 		} else if(d3Helpers.isString(scope.data)) {
@@ -27,8 +27,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				if(options.y.orient === 'right') {
 					scope.xlLeftOffset += 10;
 				}
-			} 
-			
+			}
+
 			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
 				switch(options.x.position) {
 					case 'top':
@@ -48,7 +48,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
 					(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
 			}
-			
+
 			scope.xl.call(scope.xAxis);
 
 			if(d3Helpers.isDefined(options.x.label) && options.x.label !== false) {
@@ -58,7 +58,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					.attr('dx', '0.8em')
 					.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
 					.style('text-anchor', 'start')
-					.style('font-size', '1.1em')					
+					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
 					.text(options.x.label);
 			}
@@ -84,9 +84,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							options.y.position = 'left';
 						}
 						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
-								(scope.ylTopOffset) + ')');							
+								(scope.ylTopOffset) + ')');
 						break;
-				}				
+				}
 			} else if(d3Helpers.isNumber(options.y.position)) {
 				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
 						(scope.ylTopOffset) + ')');
@@ -98,13 +98,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(d3Helpers.isDefined(options.y.label) && options.y.label !== false) {
 				scope.yl.append('text')
 					.attr('class', 'label')
-					.attr('dy', '-1em')
-					.attr('x', 0)
-					.style('text-anchor', options.y.position === 'left'? 'start':'end')
+					.attr('dy', options.y.position === 'right'? 4:(options.x.position === 'top'? 0:'-1em'))
+					.attr('x', options.y.position === 'right'? '1.5em':'1em')
+					.attr('y', options.x.position === 'top'? options.height:0)
+					.style('text-anchor', 'start')
 					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
 					.text(options.y.label);
-			}			
+			}
 		},
 
 		addSubdivideTicks: function(g, scale, axis, options) {
@@ -116,14 +117,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(options.scale !== 'sqrt' && options.scale !== 'linear') {
 				return;
 			}
-			
+
 			g.selectAll('.tick')
 				.data(scale.ticks(options.ticks), function(d) { return d; })
 				.exit()
 				.classed('minor', true)
 				.selectAll('text')
 				.style('display', 'none');
-			
+
 			switch(axis.orient()) {
 				case 'left':
 					g.selectAll('.tick.minor line')
@@ -147,7 +148,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		setXScale: function(scope, options) {
 			scope.x = d3.scale.ordinal();
 			//scope.x.range([0, options.width]);
-			
+
 			if(!d3Helpers.isDefined(scope.xAxis)) {
 				if(!d3Helpers.isDefined(options.x.orient) || !d3Helpers.isString(options.x.orient) ||
 					(options.x.orient !== 'bottom' && options.x.orient !== 'top')) {
@@ -166,7 +167,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				options.x.tickSize = 6;
 				scope.xAxis.tickSize(options.x.tickSize);
 			}
-			
+
 			var data  = _getDataFromScope(scope, options);
 			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], 0.2);
 			scope.xAxis.tickFormat(options.x.tickFormat);
@@ -325,7 +326,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				.attr('class', 'a3bar-group-bar');
 
 			var bars = series.selectAll('.a3bar-bar')
-				.data(function(d) {					
+				.data(function(d) {
 					return d[options.y.key].map(function(e) {
 						return {
 							x: d[options.x.key],

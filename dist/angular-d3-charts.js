@@ -56,6 +56,55 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 		}
 	};
 });
+angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpers, svgHelpers, barHelpers, barDefaults) {
+	return {
+		restrict: 'EA',
+		replace: true,
+		scope: {
+			options: '=options',
+			data: '=data'
+		},
+		template: '<div class="angular-a3oabar"></div>',
+		controller: function($scope) {
+			$log.info('[Angular - D3] One Axis Bar scope controller', $scope);
+		},
+		link: function(scope, element, attrs) {
+			scope.container = element;
+			var isDefined = d3Helpers.isDefined,
+				options = barDefaults.setDefaults(scope.options, attrs.id);
+
+			// Set width and height if they are defined
+			var w = isDefined(attrs.width)? attrs.width:options.width,
+				h = isDefined(attrs.height)? attrs.height:options.height;
+
+			if (isNaN(w)) {
+				element.css('width', w);
+			} else {
+				element.css('width', w + 'px');
+			}
+
+			if (isNaN(h)) {
+				element.css('height', h);
+			} else {
+				element.css('height', h + 'px');
+			}
+
+			options.width = element.width();
+			options.height = element.height();
+
+			barHelpers.setXScale(scope, options);
+			barHelpers.setYScale(scope, options);
+			if(isDefined(options.zoom) && options.zoom) {
+				svgHelpers.addZoomBehaviour(scope, barHelpers.zoomBehaviour);
+			}
+			svgHelpers.addSVG(scope, element.get(0), options);
+
+			element.width(options.containerWidth);
+			element.height(options.containerHeight);
+		}
+	};
+});
+
 angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 	function _obtainEffectiveChartId(d, chartId) {
 		var id, i;
@@ -76,6 +125,33 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		}
 
 		return id;
+	}
+
+	function _getCommonDefaults() {
+		return {
+			width: 300,
+			heigth: 250,
+			zoom: true,
+			margin: {
+				left: 10,
+				right: 10,
+				top: 10,
+				bottom: 10
+			},
+			legend: {
+				show: true,
+				width: 120
+			},
+			timeFormat: '%d-%m-%Y',
+			fontFamily: 'Arial',
+			fontSize: '0.75em',
+			axis: {
+				stroke: '#000',
+				fill: '#000'
+			},
+			showDefaultData: true,
+			locale: null
+		};
 	}
 
 	return {
@@ -133,6 +209,32 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			}
 		},
 
+		getCommonDefaults: _getCommonDefaults,
+
+		setDefaults: function(newDefaults, userDefaults) {
+			if (this.isDefined(userDefaults)) {
+				newDefaults.width = this.isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
+				newDefaults.heigth = this.isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
+				newDefaults.zoom = this.isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;
+				newDefaults.timeFormat = this.isDefined(userDefaults.timeFormat) ?  userDefaults.timeFormat : newDefaults.timeFormat;
+				newDefaults.fontFamily = this.isDefined(userDefaults.fontFamily) ?  userDefaults.fontFamily : newDefaults.fontFamily;
+				newDefaults.fontSize = this.isDefined(userDefaults.fontSize) ?  userDefaults.fontSize : newDefaults.fontSize;
+				newDefaults.showDefaultData = this.isDefined(userDefaults.showDefaultData) ?  userDefaults.showDefaultData : newDefaults.showDefaultData;
+				newDefaults.locale = this.isDefined(userDefaults.locale) ?  userDefaults.locale : newDefaults.locale;
+
+				if(this.isDefined(userDefaults.margin)) {
+					angular.extend(newDefaults.margin, userDefaults.margin);
+				}
+				if(this.isDefined(userDefaults.legend)) {
+					angular.extend(newDefaults.legend, userDefaults.legend);
+				}
+
+				if(this.isDefined(userDefaults.axis)) {
+					angular.extend(newDefaults.axis, userDefaults.axis);
+				}
+			}
+		},
+
 		getRandomString: function(length) {
 			var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 			var string_length = length || 8;
@@ -149,30 +251,19 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			var r = Math.floor(Math.random()*256);
 			var g = Math.floor(Math.random()*256);
 			var b = Math.floor(Math.random()*256);
-			
+
 			// puts the hex value inside this element (e is a jquery object)
-			return d3.rgb(r,g,b); 
+			return d3.rgb(r,g,b);
 		},
 
 		obtainEffectiveChartId: _obtainEffectiveChartId
 	};
 });
+
 angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) {
 	function _getDefaults() {
-		return {
-			width: 300,
-			heigth: 250,
-			zoom: true,
-			margin: {
-				left: 10,
-				right: 10,
-				top: 10,
-				bottom: 10
-			},
-			legend: {
-				show: true,
-				width: 120
-			},
+		var commonDefaults = d3Helpers.getCommonDefaults();
+		angular.extend(commonDefaults, {
 			series: ['A', 'B', 'C', 'D'],
 			x: {
 				tickFormat: null,
@@ -195,13 +286,6 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				ticks: 5,
 				tickSubdivide: 4
 			},
-			timeFormat: '%d-%m-%Y',
-			fontFamily: 'Arial',
-			fontSize: '0.75em',
-			axis: {
-				stroke: '#000',
-				fill: '#000'
-			},
 			defaultData: [{
 				id: 1,
 				x: 'Fruits',
@@ -217,10 +301,9 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				x: 'Meet',
 				y: [ 54, 432, 234 ],
 				tooltip: 'Meet tooltip'
-			}],
-			showDefaultData: true,
-			locale: null
-		};
+			}]
+		});
+		return commonDefaults;
 	}
 
 	var isDefined = d3Helpers.isDefined,
@@ -246,21 +329,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			var newDefaults = _getDefaults();
 
 			if (isDefined(userDefaults)) {
-				newDefaults.width = isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
-				newDefaults.heigth = isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
-				newDefaults.zoom = isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;
-				newDefaults.timeFormat = isDefined(userDefaults.timeFormat) ?  userDefaults.timeFormat : newDefaults.timeFormat;
-				newDefaults.fontFamily = isDefined(userDefaults.fontFamily) ?  userDefaults.fontFamily : newDefaults.fontFamily;
-				newDefaults.fontSize = isDefined(userDefaults.fontSize) ?  userDefaults.fontSize : newDefaults.fontSize;
-				newDefaults.showDefaultData = isDefined(userDefaults.showDefaultData) ?  userDefaults.showDefaultData : newDefaults.showDefaultData;
-				newDefaults.locale = isDefined(userDefaults.locale) ?  userDefaults.locale : newDefaults.locale;
-				
-				if(isDefined(userDefaults.margin)) {
-					angular.extend(newDefaults.margin, userDefaults.margin);
-				}
-				if(isDefined(userDefaults.legend)) {
-					angular.extend(newDefaults.legend, userDefaults.legend);
-				}
+				d3Helpers.setDefaults(newDefaults, userDefaults);
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);
@@ -268,10 +337,6 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 
 				if(isDefined(userDefaults.y)) {
 					angular.extend(newDefaults.y, userDefaults.y);
-				}
-
-				if(isDefined(userDefaults.axis)) {
-					angular.extend(newDefaults.axis, userDefaults.axis);
 				}
 
 				if(isDefined(newDefaults.defaultData)) {
@@ -285,6 +350,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 		}
 	};
 });
+
 angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Helpers, svgHelpers) {
 	var _idFunction = function(d) {
 		return d.id;
@@ -292,7 +358,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 
 	var _getDataFromScope = function(scope, options) {
 		var data = null;
-		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData && 
+		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
 			!d3Helpers.isUndefinedOrEmpty(options.defaultData)) {
 			data = options.defaultData;
 		} else if(d3Helpers.isString(scope.data)) {
@@ -314,8 +380,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				if(options.y.orient === 'right') {
 					scope.xlLeftOffset += 10;
 				}
-			} 
-			
+			}
+
 			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
 				switch(options.x.position) {
 					case 'top':
@@ -335,7 +401,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
 					(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
 			}
-			
+
 			scope.xl.call(scope.xAxis);
 
 			if(d3Helpers.isDefined(options.x.label) && options.x.label !== false) {
@@ -345,7 +411,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					.attr('dx', '0.8em')
 					.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
 					.style('text-anchor', 'start')
-					.style('font-size', '1.1em')					
+					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
 					.text(options.x.label);
 			}
@@ -371,9 +437,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							options.y.position = 'left';
 						}
 						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
-								(scope.ylTopOffset) + ')');							
+								(scope.ylTopOffset) + ')');
 						break;
-				}				
+				}
 			} else if(d3Helpers.isNumber(options.y.position)) {
 				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
 						(scope.ylTopOffset) + ')');
@@ -385,13 +451,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(d3Helpers.isDefined(options.y.label) && options.y.label !== false) {
 				scope.yl.append('text')
 					.attr('class', 'label')
-					.attr('dy', '-1em')
-					.attr('x', 0)
-					.style('text-anchor', options.y.position === 'left'? 'start':'end')
+					.attr('dy', options.y.position === 'right'? 4:(options.x.position === 'top'? 0:'-1em'))
+					.attr('x', options.y.position === 'right'? '1.5em':'1em')
+					.attr('y', options.x.position === 'top'? options.height:0)
+					.style('text-anchor', 'start')
 					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
 					.text(options.y.label);
-			}			
+			}
 		},
 
 		addSubdivideTicks: function(g, scale, axis, options) {
@@ -403,14 +470,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(options.scale !== 'sqrt' && options.scale !== 'linear') {
 				return;
 			}
-			
+
 			g.selectAll('.tick')
 				.data(scale.ticks(options.ticks), function(d) { return d; })
 				.exit()
 				.classed('minor', true)
 				.selectAll('text')
 				.style('display', 'none');
-			
+
 			switch(axis.orient()) {
 				case 'left':
 					g.selectAll('.tick.minor line')
@@ -434,7 +501,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		setXScale: function(scope, options) {
 			scope.x = d3.scale.ordinal();
 			//scope.x.range([0, options.width]);
-			
+
 			if(!d3Helpers.isDefined(scope.xAxis)) {
 				if(!d3Helpers.isDefined(options.x.orient) || !d3Helpers.isString(options.x.orient) ||
 					(options.x.orient !== 'bottom' && options.x.orient !== 'top')) {
@@ -453,7 +520,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				options.x.tickSize = 6;
 				scope.xAxis.tickSize(options.x.tickSize);
 			}
-			
+
 			var data  = _getDataFromScope(scope, options);
 			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], 0.2);
 			scope.xAxis.tickFormat(options.x.tickFormat);
@@ -612,7 +679,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				.attr('class', 'a3bar-group-bar');
 
 			var bars = series.selectAll('.a3bar-bar')
-				.data(function(d) {					
+				.data(function(d) {
 					return d[options.y.key].map(function(e) {
 						return {
 							x: d[options.x.key],
@@ -652,6 +719,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		}
 	};
 });
+
 angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Helpers) {
 	return {
 		addSVG: function(scope, container, options) {
@@ -701,18 +769,19 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				style('stroke', options.axis.stroke).
 				style('fill', 'none').
 				style('shape-rendering', 'crispEdges');
-			
+
 			scope.svg.selectAll('.axis .tick line').
 				style('stroke', options.axis.stroke).
 				style('fill', options.axis.fill);
-				
+
 			scope.svg.selectAll('.axis .tick.minor').
 				style('stroke', options.axis.stroke).
 				style('fill', options.axis.fill);
-				
+
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);
 		}
 	};
 });
+
 }());

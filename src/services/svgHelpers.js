@@ -47,15 +47,15 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				style('stroke', options.axis.stroke).
 				style('fill', 'none').
 				style('shape-rendering', 'crispEdges');
-			
+
 			scope.svg.selectAll('.axis .tick line').
 				style('stroke', options.axis.stroke).
 				style('fill', options.axis.fill);
-				
+
 			scope.svg.selectAll('.axis .tick.minor').
 				style('stroke', options.axis.stroke).
 				style('fill', options.axis.fill);
-				
+
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);
 		}
