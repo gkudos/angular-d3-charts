@@ -43,18 +43,28 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		},
 
 		updateStyles: function(scope, options) {
-			scope.svg.selectAll('.axis path').
-				style('stroke', options.axis.stroke).
-				style('fill', 'none').
-				style('shape-rendering', 'crispEdges');
+			var stroke = scope.type === 'bar'? options.axis.stroke:null;
 
-			scope.svg.selectAll('.axis .tick line').
-				style('stroke', options.axis.stroke).
-				style('fill', options.axis.fill);
+			scope.svg.selectAll('.axis path')
+				.style('stroke', stroke)
+				.style('fill', 'none')
+				.style('shape-rendering', 'crispEdges');
 
-			scope.svg.selectAll('.axis .tick.minor').
-				style('stroke', options.axis.stroke).
-				style('fill', options.axis.fill);
+			scope.svg.selectAll('.axis .tick line')
+				.style('stroke', stroke)
+				.style('fill', 'none');
+
+			scope.svg.selectAll('.axis .tick.minor')
+				.style('stroke', stroke)
+				.style('fill', 'none');
+
+			scope.svg.selectAll('.axis text')
+				.style('fill', options.axis.color)
+				.style('font-weight', options.axis.fontWeight);
+
+			scope.svg.selectAll('.axis .label')
+				.style('fill', options.axis.label.color)
+				.style('font-weight', options.axis.label.fontWeight);
 
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);

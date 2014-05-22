@@ -12,6 +12,8 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 		},
 		link: function(scope, element, attrs) {
 			scope.container = element;
+			scope.type = 'oneAxisBar';
+			scope.classPrefix = 'a3oabar';
 			var isDefined = d3Helpers.isDefined,
 				options = barDefaults.setDefaults(scope.options, attrs.id);
 
@@ -34,6 +36,9 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			options.width = element.width();
 			options.height = element.height();
 
+			// Orient option disabled for this chart.
+			options.x.orient = 'bottom';
+
 			barHelpers.setXScale(scope, options);
 			barHelpers.setYScale(scope, options);
 			if(isDefined(options.zoom) && options.zoom) {
@@ -43,6 +48,11 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 
 			element.width(options.containerWidth);
 			element.height(options.containerHeight);
+
+			barHelpers.addOneAxis(scope, options);
+			svgHelpers.updateStyles(scope, options);
+
+			barHelpers.updateData(scope, options);
 		}
 	};
 });

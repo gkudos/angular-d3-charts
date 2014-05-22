@@ -100,7 +100,7 @@ module.exports = function(grunt) {
         quotmark: 'single',
         globals: {
           angular: false,
-          d3: false
+          d3: false,
         },
         reporter: require('jshint-stylish')
       },
@@ -109,6 +109,33 @@ module.exports = function(grunt) {
       },
       tests: {
         src: ['test/unit/*.js', 'test/e2e/*.js'],
+
+				options: {
+					globals: {
+						angular: false,
+						d3: false,
+						
+						// Jasmine
+						jasmine : false,
+						isCommonJS : false,
+						exports : false,
+						spyOn : false,
+						it : false,
+						xit : false,
+						expect : false,
+						runs : false,
+						waits : false,
+						waitsFor : false,
+						beforeEach : false,
+						afterEach : false,
+						describe : false,
+						xdescribe : false,
+
+						// Angular mocks
+						module: false,
+						inject: false
+					}
+				}
       },
       gruntfile: {
         src: 'Gruntfile.js',
@@ -119,32 +146,41 @@ module.exports = function(grunt) {
         }
       }
     },
+		karma: {
+      unit: {
+        configFile: 'test/karma.conf.js',
+        autoWatch: false,
+        singleRun: true
+      }
+		},
     watch: {
       options : {
         livereload: 7777
       },
       source: {
-        files: ['src/**/*.js'],
+        files: ['src/**/*.js', 'test/unit/**.js', 'test/e2e/**.js'],
         tasks: [
           'jshint:source',
+					'jshint:tests',
           'concat:dist',
           'uglify',
-          //'test:unit',
+          'test:unit',
           //'concat:license'
         ]
       },
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
-      },
-      tests: {
-        src: ['test/unit/*.js', 'test/e2e/*.js'],
       }
     }
   });
 
   // Default task.
   grunt.registerTask('default', ['watch:source']);
+	grunt.registerTask('test', ['jshint','test:unit', 'test:e2e']);
+  grunt.registerTask('test:unit', ['karma:unit']);
+	grunt.registerTask('test:e2e', ['shell:protractor_update', 'connect:testserver', 'protractor:run']);
+  grunt.registerTask('test:e2e-firefox', ['shell:protractor_update', 'connect:testserver', 'protractor:firefox']);
 
   //development
   grunt.registerTask('dev', ['connect:devserver', 'open:devserver', 'watch:source']);

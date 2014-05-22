@@ -1,4 +1,4 @@
-angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) {
+angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers, $log) {
 	function _getDefaults() {
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
@@ -24,6 +24,14 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				ticks: 5,
 				tickSubdivide: 4
 			},
+			axis: {
+				valuesColor: '#000',
+				percentColor: '#000',
+				label: {
+					color: '#000',
+					fontWeight: 'bold'
+				}
+			},
 			defaultData: [{
 				id: 1,
 				x: 'Fruits',
@@ -37,10 +45,11 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			}, {
 				id: 3,
 				x: 'Meet',
-				y: [ 54, 432, 234 ],
+				y: [ 154, 432, 234 ],
 				tooltip: 'Meet tooltip'
 			}]
 		});
+		$log.debug('[] Common defaults:', commonDefaults);
 		return commonDefaults;
 	}
 

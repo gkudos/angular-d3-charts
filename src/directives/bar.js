@@ -12,19 +12,21 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 		},
 		link: function(scope, element, attrs) {
 			scope.container = element;
+			scope.type = 'bar';
+			scope.classPrefix = 'a3bar';
 			var isDefined = d3Helpers.isDefined,
 				options = barDefaults.setDefaults(scope.options, attrs.id);
 
 			// Set width and height if they are defined
 			var w = isDefined(attrs.width)? attrs.width:options.width,
 				h = isDefined(attrs.height)? attrs.height:options.height;
-			
+
 			if (isNaN(w)) {
 				element.css('width', w);
 			} else {
 				element.css('width', w + 'px');
 			}
-		
+
 			if (isNaN(h)) {
 				element.css('height', h);
 			} else {

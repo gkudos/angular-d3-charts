@@ -40,7 +40,12 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			fontSize: '0.75em',
 			axis: {
 				stroke: '#000',
-				fill: '#000'
+				color: '#000',
+				label: {
+					color: '#000',
+					fontWeight: 'bold'
+				},
+				fontWeight: 'normal'
 			},
 			showDefaultData: true,
 			locale: null
