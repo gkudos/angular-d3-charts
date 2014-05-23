@@ -1,51 +1,30 @@
-angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) {
+angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) {
 	function _getDefaults() {
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
-			series: ['A', 'B', 'C', 'D'],
+			radius: 0,
 			x: {
-				tickFormat: null,
-				tickSize: 6,
-				orient: 'bottom',
-				position: 'bottom',
 				key: 'x',
 				label: 'x',
-				ticks: 5,
-				tickSubdivide: 4
 			},
 			y: {
-				scale: 'linear',
-				tickFormat: null,
-				tickSize: 6,
-				orient: 'left',
-				position: 'left',
 				key: 'y',
 				label: 'y',
-				ticks: 5,
-				tickSubdivide: 4
-			},
-			axis: {
-				valuesColor: '#000',
-				percentColor: '#000',
-				label: {
-					color: '#000',
-					fontWeight: 'bold'
-				}
 			},
 			defaultData: [{
 				id: 1,
 				x: 'Fruits',
-				y: [ 54, 0, 879 ],
+				y: 54,
 				tooltip: 'Fruits tooltip'
 			}, {
 				id: 2,
 				x: 'Vegetables',
-				y: [ 12, 34, 15 ],
+				y: 23,
 				tooltip: 'Vegetables tooltip'
 			}, {
 				id: 3,
 				x: 'Meet',
-				y: [ 154, 432, 234 ],
+				y: 41,
 				tooltip: 'Meet tooltip'
 			}]
 		});
@@ -58,16 +37,16 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 
 	return {
 		getDefaults: function (scopeId) {
-			var barId = obtainEffectiveChartId(defaults, scopeId);
-			return defaults[barId];
+			var pieId = obtainEffectiveChartId(defaults, scopeId);
+			return defaults[pieId];
 		},
 
 		getCreationDefaults: function (scopeId) {
 			var d = this.getDefaults(scopeId);
 
-			var barDefaults = {};
-			angular.extend(barDefaults, d);
-			return barDefaults;
+			var pieDefaults = {};
+			angular.extend(pieDefaults, d);
+			return pieDefaults;
 		},
 
 		setDefaults: function(userDefaults, scopeId) {
@@ -75,6 +54,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 
 			if (isDefined(userDefaults)) {
 				d3Helpers.setDefaults(newDefaults, userDefaults);
+
+				newDefaults.radius = d3Helpers.isDefined(userDefaults.radius)?  userDefaults.radius:newDefaults.radius;
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);
@@ -89,8 +70,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				}
 			}
 
-			var barId = obtainEffectiveChartId(defaults, scopeId);
-			defaults[barId] = newDefaults;
+			var pieId = obtainEffectiveChartId(defaults, scopeId);
+			defaults[pieId] = newDefaults;
 			return newDefaults;
 		}
 	};

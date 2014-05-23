@@ -133,6 +133,19 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			}
 		},
 
+		getDataFromScope: function(scope, options) {
+			var data = null;
+			if(this.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
+				!this.isUndefinedOrEmpty(options.defaultData)) {
+				data = options.defaultData;
+			} else if(this.isString(scope.data)) {
+
+			} else {
+				data = scope.data;
+			}
+			return data;
+		},
+
 		getRandomString: function(length) {
 			var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 			var string_length = length || 8;

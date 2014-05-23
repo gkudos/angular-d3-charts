@@ -3,19 +3,6 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		return d.id;
 	};
 
-	var _getDataFromScope = function(scope, options) {
-		var data = null;
-		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
-			!d3Helpers.isUndefinedOrEmpty(options.defaultData)) {
-			data = options.defaultData;
-		} else if(d3Helpers.isString(scope.data)) {
-
-		} else {
-			data = scope.data;
-		}
-		return data;
-	};
-
 	var _addXAxis = function(scope, options) {
 		scope.xl = scope.svg.append('g')
 			.attr('class', 'x axis');
@@ -115,7 +102,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			this.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
 		},
 
-		addOneAxis: function(scope, options) {			
+		addOneAxis: function(scope, options) {
 			_addXAxis(scope, options);
 			scope.ylTopOffset = options.x.position === 'top'? options.height*0.125:options.height*0.2;
 
@@ -193,7 +180,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				scope.xAxis.tickSize(options.x.tickSize);
 			}
 
-			var data  = _getDataFromScope(scope, options);
+			var data  = d3Helpers.getDataFromScope(scope, options);
 			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], 0.2);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.chartData)) {
@@ -282,7 +269,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		},
 
 		updateData: function(scope, options) {
-			var data = _getDataFromScope(scope, options);
+			var data = d3Helpers.getDataFromScope(scope, options);
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for bars');
 				return;

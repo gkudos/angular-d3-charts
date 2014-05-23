@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html ng-app="demoapp">
+	<head>
+		<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="../bower_components/angular/angular.min.js"></script>
+		<script src="../bower_components/d3/d3.min.js"></script>
+		<script src="../dist/angular-d3-charts.js"></script>
+		<script>
+				var app = angular.module("demoapp", ['angular-d3-charts']);
+				app.controller("DemoController", [ "$scope", function($scope) {
+						// Nothing here!
+						angular.extend($scope, {
+							options: {
+								radius: 50
+							}
+						});
+				}]);
+		</script>
+	</head>
+	<body ng-controller="DemoController">
+		<a3pie width="300px" height="300px" options="options"></a3pie>
+	</body>
+</html>

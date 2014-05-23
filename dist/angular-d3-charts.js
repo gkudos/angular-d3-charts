@@ -118,6 +118,59 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 	};
 });
 
+angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers, svgHelpers, pieHelpers, pieDefaults) {
+	return {
+		restrict: 'EA',
+		replace: true,
+		scope: {
+			options: '=options',
+			data: '=data'
+		},
+		template: '<div class="angular-a3pie"></div>',
+		controller: function($scope) {
+			$log.info('[Angular - D3] Pie scope controller', $scope);
+		},
+		link: function(scope, element, attrs) {
+			scope.container = element;
+			scope.type = 'pie';
+			scope.classPrefix = 'a3pie';
+			var isDefined = d3Helpers.isDefined,
+				options = pieDefaults.setDefaults(scope.options, attrs.id);
+
+			// Set width and height if they are defined
+			var w = isDefined(attrs.width)? attrs.width:options.width,
+				h = isDefined(attrs.height)? attrs.height:options.height;
+
+			if (isNaN(w)) {
+				element.css('width', w);
+			} else {
+				element.css('width', w + 'px');
+			}
+
+			if (isNaN(h)) {
+				element.css('height', h);
+			} else {
+				element.css('height', h + 'px');
+			}
+
+			options.width = element.width();
+			options.height = element.height();
+
+			svgHelpers.addSVG(scope, element.get(0), options);
+			scope.svg.attr('transform', 'translate(' + options.width / 2 + ',' + options.height / 2 + ')');
+
+			element.width(options.containerWidth);
+			element.height(options.containerHeight);
+
+			pieHelpers.addArc(scope, options);
+			//svgHelpers.updateStyles(scope, options);
+
+			pieHelpers.updateData(scope, options);
+
+		}
+	};
+});
+
 angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 	function _obtainEffectiveChartId(d, chartId) {
 		var id, i;
@@ -253,6 +306,19 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			}
 		},
 
+		getDataFromScope: function(scope, options) {
+			var data = null;
+			if(this.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
+				!this.isUndefinedOrEmpty(options.defaultData)) {
+				data = options.defaultData;
+			} else if(this.isString(scope.data)) {
+
+			} else {
+				data = scope.data;
+			}
+			return data;
+		},
+
 		getRandomString: function(length) {
 			var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 			var string_length = length || 8;
@@ -278,7 +344,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 	};
 });
 
-angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers, $log) {
+angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) {
 	function _getDefaults() {
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
@@ -329,14 +395,12 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers, 
 				tooltip: 'Meet tooltip'
 			}]
 		});
-		$log.debug('[] Common defaults:', commonDefaults);
 		return commonDefaults;
 	}
 
 	var isDefined = d3Helpers.isDefined,
 		obtainEffectiveChartId = d3Helpers.obtainEffectiveChartId,
 		defaults = {};
-
 
 	return {
 		getDefaults: function (scopeId) {
@@ -378,22 +442,88 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers, 
 	};
 });
 
+angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) {
+	function _getDefaults() {
+		var commonDefaults = d3Helpers.getCommonDefaults();
+		angular.extend(commonDefaults, {
+			radius: 0,
+			x: {
+				key: 'x',
+				label: 'x',
+			},
+			y: {
+				key: 'y',
+				label: 'y',
+			},
+			defaultData: [{
+				id: 1,
+				x: 'Fruits',
+				y: 54,
+				tooltip: 'Fruits tooltip'
+			}, {
+				id: 2,
+				x: 'Vegetables',
+				y: 23,
+				tooltip: 'Vegetables tooltip'
+			}, {
+				id: 3,
+				x: 'Meet',
+				y: 41,
+				tooltip: 'Meet tooltip'
+			}]
+		});
+		return commonDefaults;
+	}
+
+	var isDefined = d3Helpers.isDefined,
+		obtainEffectiveChartId = d3Helpers.obtainEffectiveChartId,
+		defaults = {};
+
+	return {
+		getDefaults: function (scopeId) {
+			var pieId = obtainEffectiveChartId(defaults, scopeId);
+			return defaults[pieId];
+		},
+
+		getCreationDefaults: function (scopeId) {
+			var d = this.getDefaults(scopeId);
+
+			var pieDefaults = {};
+			angular.extend(pieDefaults, d);
+			return pieDefaults;
+		},
+
+		setDefaults: function(userDefaults, scopeId) {
+			var newDefaults = _getDefaults();
+
+			if (isDefined(userDefaults)) {
+				d3Helpers.setDefaults(newDefaults, userDefaults);
+
+				newDefaults.radius = d3Helpers.isDefined(userDefaults.radius)?  userDefaults.radius:newDefaults.radius;
+
+				if(isDefined(userDefaults.x)) {
+					angular.extend(newDefaults.x, userDefaults.x);
+				}
+
+				if(isDefined(userDefaults.y)) {
+					angular.extend(newDefaults.y, userDefaults.y);
+				}
+
+				if(isDefined(newDefaults.defaultData)) {
+					angular.extend(newDefaults.defaultData, newDefaults.defaultData);
+				}
+			}
+
+			var pieId = obtainEffectiveChartId(defaults, scopeId);
+			defaults[pieId] = newDefaults;
+			return newDefaults;
+		}
+	};
+});
+
 angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Helpers, svgHelpers) {
 	var _idFunction = function(d) {
 		return d.id;
-	};
-
-	var _getDataFromScope = function(scope, options) {
-		var data = null;
-		if(d3Helpers.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&
-			!d3Helpers.isUndefinedOrEmpty(options.defaultData)) {
-			data = options.defaultData;
-		} else if(d3Helpers.isString(scope.data)) {
-
-		} else {
-			data = scope.data;
-		}
-		return data;
 	};
 
 	var _addXAxis = function(scope, options) {
@@ -495,7 +625,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			this.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
 		},
 
-		addOneAxis: function(scope, options) {			
+		addOneAxis: function(scope, options) {
 			_addXAxis(scope, options);
 			scope.ylTopOffset = options.x.position === 'top'? options.height*0.125:options.height*0.2;
 
@@ -573,7 +703,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				scope.xAxis.tickSize(options.x.tickSize);
 			}
 
-			var data  = _getDataFromScope(scope, options);
+			var data  = d3Helpers.getDataFromScope(scope, options);
 			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], 0.2);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.chartData)) {
@@ -662,7 +792,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		},
 
 		updateData: function(scope, options) {
-			var data = _getDataFromScope(scope, options);
+			var data = d3Helpers.getDataFromScope(scope, options);
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for bars');
 				return;
@@ -830,6 +960,41 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			svgHelpers.updateStyles(scope, options);
+		}
+	};
+});
+
+angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Helpers/*, svgHelpers*/) {
+	return {
+		addArc: function(scope, options) {
+			scope.arc = d3.svg.arc()
+		    .outerRadius(options.width/2 - options.margin.left)
+		    .innerRadius(options.radius);
+
+			scope.pie = d3.layout.pie()
+		    .sort(null)
+		    .value(function(d) { return d[options.y.key]; });
+
+		},
+
+		updateData: function(scope, options) {
+			var data = d3Helpers.getDataFromScope(scope, options);
+			if(d3Helpers.isUndefinedOrEmpty(data)) {
+				$log.warn('[Angular - D3] No data for pie');
+				return;
+			}
+
+			var colors = d3.scale.category20();
+			var g = scope.svg.selectAll('.' + scope.classPrefix + '-arc')
+	      .data(scope.pie(data))
+				.enter().append('g')
+	      .attr('class', scope.classPrefix + '-arc');
+
+			g.append('path')
+	      .attr('d', scope.arc)
+	      .style('fill', function(d) {
+					return colors(d.data[options.x.key]);
+				});
 		}
 	};
 });
