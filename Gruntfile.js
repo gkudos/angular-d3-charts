@@ -185,4 +185,5 @@ module.exports = function(grunt) {
   //development
   grunt.registerTask('dev', ['connect:devserver', 'open:devserver', 'watch:source']);
 	grunt.registerTask('build', ['jshint:source', 'concat:dist', 'uglify']);
+	grunt.registerTask('travis', ['build', 'test:unit']);
 };
