@@ -1,35 +1,54 @@
-angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) {
+angular.module('angular-d3-charts').factory('lineDefaults', function (d3Helpers) {
 	function _getDefaults() {
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
-			radius: 0,
+			series: ['A', 'B', 'C', 'D'],
 			x: {
+				scale: 'linear',
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'bottom',
+				position: 'bottom',
 				key: 'x',
 				label: 'x',
+				ticks: 5,
+				tickSubdivide: 4
 			},
 			y: {
+				scale: 'linear',
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'left',
+				position: 'left',
 				key: 'y',
 				label: 'y',
+				ticks: 5,
+				tickSubdivide: 4
+			},
+			axis: {
+				valuesColor: '#000',
+				percentColor: '#000',
+				label: {
+					color: '#000',
+					fontWeight: 'bold'
+				}
 			},
 			defaultData: [{
 				id: 1,
 				x: 'Fruits',
-				y: 54,
+				y: [ 54, 0, 879 ],
 				tooltip: 'Fruits tooltip'
 			}, {
 				id: 2,
 				x: 'Vegetables',
-				y: 23,
+				y: [ 12, 34, 15 ],
 				tooltip: 'Vegetables tooltip'
 			}, {
 				id: 3,
 				x: 'Meet',
-				y: 41,
+				y: [ 154, 432, 234 ],
 				tooltip: 'Meet tooltip'
-			}],
-			showPercent: false,
-			borderColor: '#FFF',
-			pieAnimation: 'normal'
+			}]
 		});
 		return commonDefaults;
 	}
@@ -40,16 +59,16 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 
 	return {
 		getDefaults: function (scopeId) {
-			var pieId = obtainEffectiveChartId(defaults, scopeId);
-			return defaults[pieId];
+			var lineId = obtainEffectiveChartId(defaults, scopeId);
+			return defaults[lineId];
 		},
 
 		getCreationDefaults: function (scopeId) {
 			var d = this.getDefaults(scopeId);
 
-			var pieDefaults = {};
-			angular.extend(pieDefaults, d);
-			return pieDefaults;
+			var lineDefaults = {};
+			angular.extend(lineDefaults, d);
+			return lineDefaults;
 		},
 
 		setDefaults: function(userDefaults, scopeId) {
@@ -57,11 +76,6 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 
 			if (isDefined(userDefaults)) {
 				d3Helpers.setDefaults(newDefaults, userDefaults);
-
-				newDefaults.radius = d3Helpers.isDefined(userDefaults.radius)?  userDefaults.radius:newDefaults.radius;
-				newDefaults.showPercent = d3Helpers.isDefined(userDefaults.showPercent)?  userDefaults.showPercent:newDefaults.showPercent;
-				newDefaults.borderColor = d3Helpers.isDefined(userDefaults.borderColor)?  userDefaults.borderColor:newDefaults.borderColor;
-				newDefaults.pieAnimation = d3Helpers.isDefined(userDefaults.pieAnimation)?  userDefaults.pieAnimation:newDefaults.pieAnimation;				
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);
@@ -76,8 +90,8 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 				}
 			}
 
-			var pieId = obtainEffectiveChartId(defaults, scopeId);
-			defaults[pieId] = newDefaults;
+			var lineId = obtainEffectiveChartId(defaults, scopeId);
+			defaults[lineId] = newDefaults;
 			return newDefaults;
 		}
 	};

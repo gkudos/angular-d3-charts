@@ -26,4 +26,11 @@ describe('Directive a3bar', function() {
 		scope.$digest();
 		expect(element.find('svg').size()).toEqual(1);
 	});
+
+	it('Should have 3 arcs for default data', function() {
+		var element = angular.element(directive);
+		element = $compile(element)(scope);
+		scope.$digest();
+		expect(element.find('svg .a3pie-arc').size()).toEqual(3);
+	});
 });

@@ -133,6 +133,27 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			}
 		},
 
+		setSize: function(element, options, attrs) {
+			// Set width and height if they are defined
+			var w = this.isDefined(attrs.width)? attrs.width:options.width,
+				h = this.isDefined(attrs.height)? attrs.height:options.height;
+
+			if (isNaN(w)) {
+				element.css('width', w);
+			} else {
+				element.css('width', w + 'px');
+			}
+
+			if (isNaN(h)) {
+				element.css('height', h);
+			} else {
+				element.css('height', h + 'px');
+			}
+
+			options.width = element.width();
+			options.height = element.height();
+		},
+
 		getDataFromScope: function(scope, options) {
 			var data = null;
 			if(this.isUndefinedOrEmpty(scope.data) && options.showDefaultData &&

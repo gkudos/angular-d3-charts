@@ -22,11 +22,14 @@ module.exports = function(grunt) {
           'src/directives/bar.js',
 					'src/directives/oneAxisBar.js',
 					'src/directives/pie.js',
+					'src/directives/line.js',
           'src/services/d3Helpers.js',
           'src/services/barDefaults.js',
 					'src/services/pieDefaults.js',
+					'src/services/lineDefaults.js',
           'src/services/barHelpers.js',
 					'src/services/pieHelpers.js',
+					'src/services/lineHelpers.js',
           'src/services/svgHelpers.js'
         ],
         dest: 'dist/<%= pkg.name %>.js'

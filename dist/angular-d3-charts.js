@@ -21,25 +21,7 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 			var isDefined = d3Helpers.isDefined,
 				options = barDefaults.setDefaults(scope.options, attrs.id);
 
-			// Set width and height if they are defined
-			var w = isDefined(attrs.width)? attrs.width:options.width,
-				h = isDefined(attrs.height)? attrs.height:options.height;
-
-			if (isNaN(w)) {
-				element.css('width', w);
-			} else {
-				element.css('width', w + 'px');
-			}
-
-			if (isNaN(h)) {
-				element.css('height', h);
-			} else {
-				element.css('height', h + 'px');
-			}
-
-
-			options.width = element.width();
-			options.height = element.height();
+			d3Helpers.setSize(element, options, attrs);
 
 			barHelpers.setXScale(scope, options);
 			barHelpers.setYScale(scope, options);
@@ -78,24 +60,7 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			var isDefined = d3Helpers.isDefined,
 				options = barDefaults.setDefaults(scope.options, attrs.id);
 
-			// Set width and height if they are defined
-			var w = isDefined(attrs.width)? attrs.width:options.width,
-				h = isDefined(attrs.height)? attrs.height:options.height;
-
-			if (isNaN(w)) {
-				element.css('width', w);
-			} else {
-				element.css('width', w + 'px');
-			}
-
-			if (isNaN(h)) {
-				element.css('height', h);
-			} else {
-				element.css('height', h + 'px');
-			}
-
-			options.width = element.width();
-			options.height = element.height();
+			d3Helpers.setSize(element, options, attrs);
 
 			// Orient option disabled for this chart.
 			options.x.orient = 'bottom';
@@ -134,27 +99,9 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			scope.container = element;
 			scope.type = 'pie';
 			scope.classPrefix = 'a3pie';
-			var isDefined = d3Helpers.isDefined,
-				options = pieDefaults.setDefaults(scope.options, attrs.id);
+			var options = pieDefaults.setDefaults(scope.options, attrs.id);
 
-			// Set width and height if they are defined
-			var w = isDefined(attrs.width)? attrs.width:options.width,
-				h = isDefined(attrs.height)? attrs.height:options.height;
-
-			if (isNaN(w)) {
-				element.css('width', w);
-			} else {
-				element.css('width', w + 'px');
-			}
-
-			if (isNaN(h)) {
-				element.css('height', h);
-			} else {
-				element.css('height', h + 'px');
-			}
-
-			options.width = element.width();
-			options.height = element.height();
+			d3Helpers.setSize(element, options, attrs);
 
 			svgHelpers.addSVG(scope, element.get(0), options);
 			scope.svg.attr('transform', 'translate(' + options.width / 2 + ',' + options.height / 2 + ')');
@@ -167,6 +114,35 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 
 			pieHelpers.updateData(scope, options);
 
+		}
+	};
+});
+
+angular.module('angular-d3-charts').directive('a3line', function ($log, d3Helpers, svgHelpers, lineHelpers, lineDefaults) {
+	return {
+		restrict: 'EA',
+		replace: true,
+		scope: {
+			options: '=options',
+			data: '=data'
+		},
+		template: '<div class="angular-a3line"></div>',
+		controller: function($scope) {
+			$log.info('[Angular - D3] Line scope controller', $scope);
+		},
+		link: function(scope, element, attrs) {
+			scope.container = element;
+			scope.type = 'line';
+			scope.classPrefix = 'a3line';
+
+			var options = lineDefaults.setDefaults(scope.options, attrs.id);
+
+			d3Helpers.setSize(element, options, attrs);
+
+			svgHelpers.addSVG(scope, element.get(0), options);
+
+			element.width(options.containerWidth);
+			element.height(options.containerHeight);
 		}
 	};
 });
@@ -304,6 +280,27 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 					angular.extend(newDefaults.axis, userDefaults.axis);
 				}
 			}
+		},
+
+		setSize: function(element, options, attrs) {
+			// Set width and height if they are defined
+			var w = this.isDefined(attrs.width)? attrs.width:options.width,
+				h = this.isDefined(attrs.height)? attrs.height:options.height;
+
+			if (isNaN(w)) {
+				element.css('width', w);
+			} else {
+				element.css('width', w + 'px');
+			}
+
+			if (isNaN(h)) {
+				element.css('height', h);
+			} else {
+				element.css('height', h + 'px');
+			}
+
+			options.width = element.width();
+			options.height = element.height();
 		},
 
 		getDataFromScope: function(scope, options) {
@@ -470,7 +467,10 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 				x: 'Meet',
 				y: 41,
 				tooltip: 'Meet tooltip'
-			}]
+			}],
+			showPercent: false,
+			borderColor: '#FFF',
+			pieAnimation: 'normal'
 		});
 		return commonDefaults;
 	}
@@ -500,6 +500,9 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 				d3Helpers.setDefaults(newDefaults, userDefaults);
 
 				newDefaults.radius = d3Helpers.isDefined(userDefaults.radius)?  userDefaults.radius:newDefaults.radius;
+				newDefaults.showPercent = d3Helpers.isDefined(userDefaults.showPercent)?  userDefaults.showPercent:newDefaults.showPercent;
+				newDefaults.borderColor = d3Helpers.isDefined(userDefaults.borderColor)?  userDefaults.borderColor:newDefaults.borderColor;
+				newDefaults.pieAnimation = d3Helpers.isDefined(userDefaults.pieAnimation)?  userDefaults.pieAnimation:newDefaults.pieAnimation;				
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);
@@ -521,112 +524,119 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 	};
 });
 
+angular.module('angular-d3-charts').factory('lineDefaults', function (d3Helpers) {
+	function _getDefaults() {
+		var commonDefaults = d3Helpers.getCommonDefaults();
+		angular.extend(commonDefaults, {
+			series: ['A', 'B', 'C', 'D'],
+			x: {
+				scale: 'linear',
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'bottom',
+				position: 'bottom',
+				key: 'x',
+				label: 'x',
+				ticks: 5,
+				tickSubdivide: 4
+			},
+			y: {
+				scale: 'linear',
+				tickFormat: null,
+				tickSize: 6,
+				orient: 'left',
+				position: 'left',
+				key: 'y',
+				label: 'y',
+				ticks: 5,
+				tickSubdivide: 4
+			},
+			axis: {
+				valuesColor: '#000',
+				percentColor: '#000',
+				label: {
+					color: '#000',
+					fontWeight: 'bold'
+				}
+			},
+			defaultData: [{
+				id: 1,
+				x: 'Fruits',
+				y: [ 54, 0, 879 ],
+				tooltip: 'Fruits tooltip'
+			}, {
+				id: 2,
+				x: 'Vegetables',
+				y: [ 12, 34, 15 ],
+				tooltip: 'Vegetables tooltip'
+			}, {
+				id: 3,
+				x: 'Meet',
+				y: [ 154, 432, 234 ],
+				tooltip: 'Meet tooltip'
+			}]
+		});
+		return commonDefaults;
+	}
+
+	var isDefined = d3Helpers.isDefined,
+		obtainEffectiveChartId = d3Helpers.obtainEffectiveChartId,
+		defaults = {};
+
+	return {
+		getDefaults: function (scopeId) {
+			var lineId = obtainEffectiveChartId(defaults, scopeId);
+			return defaults[lineId];
+		},
+
+		getCreationDefaults: function (scopeId) {
+			var d = this.getDefaults(scopeId);
+
+			var lineDefaults = {};
+			angular.extend(lineDefaults, d);
+			return lineDefaults;
+		},
+
+		setDefaults: function(userDefaults, scopeId) {
+			var newDefaults = _getDefaults();
+
+			if (isDefined(userDefaults)) {
+				d3Helpers.setDefaults(newDefaults, userDefaults);
+
+				if(isDefined(userDefaults.x)) {
+					angular.extend(newDefaults.x, userDefaults.x);
+				}
+
+				if(isDefined(userDefaults.y)) {
+					angular.extend(newDefaults.y, userDefaults.y);
+				}
+
+				if(isDefined(newDefaults.defaultData)) {
+					angular.extend(newDefaults.defaultData, newDefaults.defaultData);
+				}
+			}
+
+			var lineId = obtainEffectiveChartId(defaults, scopeId);
+			defaults[lineId] = newDefaults;
+			return newDefaults;
+		}
+	};
+});
+
 angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Helpers, svgHelpers) {
 	var _idFunction = function(d) {
 		return d.id;
 	};
 
-	var _addXAxis = function(scope, options) {
-		scope.xl = scope.svg.append('g')
-			.attr('class', 'x axis');
-
-		scope.xlLeftOffset = 0;
-		if(options.y.position === 'left') {
-			scope.xlLeftOffset = 30;
-			if(options.y.orient === 'right') {
-				scope.xlLeftOffset += 10;
-			}
-		}
-
-		if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
-			switch(options.x.position) {
-				case 'top':
-					scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'bottom'? 0:20) + ')');
-					break;
-				default:
-					if(!d3Helpers.isDefined(options.x.position) || !d3Helpers.isString(options.x.position) ||
-						options.x.position !== 'bottom') {
-						$log.warn('[Angular - D3] X Axis position must be a string. Setting default value "bottom"');
-						options.x.position = 'bottom';
-					}
-					scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-						(options.height + (options.x.orient === 'bottom'? 0:20))+ ')');
-					break;
-			}
-		} else if(d3Helpers.isNumber(options.x.position)) {
-			scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-				(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
-		}
-
-		scope.xl.call(scope.xAxis);
-
-		if(d3Helpers.isDefined(options.x.label) && options.x.label !== false) {
-			scope.xl.append('text')
-				.attr('class', 'label')
-				.attr('transform', 'translate(' + (options.width) + ')')
-				.attr('dx', '0.8em')
-				.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
-				.style('text-anchor', 'start')
-				.style('font-size', '1.1em')
-				.style('font-weight', 'bold')
-				.text(options.x.label);
-		}
-	};
-
-	var _addYAxis = function(scope, options) {
-		scope.yl = scope.svg.append('g')
-			.attr('class', 'y axis');
-
-		scope.ylTopOffset = 0;
-		if(options.x.position === 'top') {
-			scope.ylTopOffset = 30;
-		}
-
-		if(!d3Helpers.isDefined(options.y.position) || d3Helpers.isString(options.y.position)) {
-			switch(options.y.position) {
-				case 'right':
-					scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'left'? 20:0)) + ',' +
-							(scope.ylTopOffset) + ')');
-					break;
-				default:
-					if(!d3Helpers.isDefined(options.y.position) || !d3Helpers.isString(options.y.position) ||
-						options.y.position !== 'left') {
-						$log.warn('[Angular - D3] Y Axis position must be a string. Setting default value "left"');
-						options.y.position = 'left';
-					}
-					scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
-							(scope.ylTopOffset) + ')');
-					break;
-			}
-		} else if(d3Helpers.isNumber(options.y.position)) {
-			scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
-					(scope.ylTopOffset) + ')');
-		}
-
-		scope.yl.call(scope.yAxis);
-
-		if(d3Helpers.isDefined(options.y.label) && options.y.label !== false) {
-			scope.yl.append('text')
-				.attr('class', 'label')
-				.attr('dy', options.y.position === 'right'? 4:(options.x.position === 'top'? 0:'-1em'))
-				.attr('x', options.y.position === 'right'? '1.5em':'1em')
-				.attr('y', options.x.position === 'top'? options.height:0)
-				.style('text-anchor', 'start')
-				.style('font-size', '1.1em')
-				.style('font-weight', 'bold')
-				.text(options.y.label);
-		}
-	};
-
 	return {
 		addAxis: function(scope, options) {
-			_addXAxis(scope, options);
-			_addYAxis(scope, options);
-			this.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
+			svgHelpers.addXAxis(scope, options);
+			svgHelpers.addYAxis(scope, options);
+			svgHelpers.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
 		},
 
 		addOneAxis: function(scope, options) {
-			_addXAxis(scope, options);
+			svgHelpers.addXAxis(scope, options);
 			scope.ylTopOffset = options.x.position === 'top'? options.height*0.125:options.height*0.2;
 
 			scope.guide = scope.svg.append('g')
@@ -641,43 +651,6 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				.style('stroke', '#BBB')
 				.style('stroke-width', 1)
 				.style('shape-rendering', 'crispEdges');
-		},
-
-		addSubdivideTicks: function(g, scale, axis, options) {
-			g.selectAll('.tick.minor')
-				.classed('minor', false)
-				.selectAll('text')
-				.style('display', null)
-				.style('stroke-width', 0);
-			if(options.scale !== 'sqrt' && options.scale !== 'linear') {
-				return;
-			}
-
-			g.selectAll('.tick')
-				.data(scale.ticks(options.ticks), function(d) { return d; })
-				.exit()
-				.classed('minor', true)
-				.selectAll('text')
-				.style('display', 'none');
-
-			switch(axis.orient()) {
-				case 'left':
-					g.selectAll('.tick.minor line')
-						.attr('x2', -4);
-					break;
-				case 'bottom':
-					g.selectAll('.tick.minor line')
-						.attr('y2', 4);
-					break;
-				case 'top':
-					g.selectAll('.tick.minor line')
-						.attr('y2', -4);
-					break;
-				case 'right':
-					g.selectAll('.tick.minor line')
-						.attr('x2', 4);
-					break;
-			}
 		},
 
 		setXScale: function(scope, options) {
@@ -849,7 +822,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 			if(scope.type === 'bar') {
 				scope.yl.call(scope.yAxis);
-				this.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
+				svgHelpers.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
 			}
 
 			if(d3Helpers.isDefined(scope.zoom) && d3Helpers.isDefined(options.zoom) && options.zoom) {
@@ -965,6 +938,33 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 });
 
 angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Helpers/*, svgHelpers*/) {
+	function _tweenPie(scope, options, b) {
+		b.innerRadius = 0;
+		var start = null;
+		switch(options.pieAnimation) {
+			case 'inverse':
+				start = {startAngle: 2*Math.PI, endAngle: 2*Math.PI};
+				break;
+			case 'crossfade':
+				start = {startAngle: 2*Math.PI, endAngle: 0};
+				break;
+			case 'crossfade-inverse':
+				start = {startAngle: 0, endAngle: 2*Math.PI};
+				break;
+			default:
+				if(!d3Helpers.isDefined(options.pieAnimation) || options.pieAnimation !== '') {
+					$log.warn('[Angular - D3] The option "pieAnimation" is undefined or it has a invalid value. Setting to "normal"');
+					options.pieAnimation = 'normal';
+				}
+				start = {startAngle: 0, endAngle: 0};
+				break;
+		}
+		var i = d3.interpolate(start, b);
+		return function(t) {
+			return scope.arc(i(t));
+		};
+	}
+
 	return {
 		addArc: function(scope, options) {
 			scope.arc = d3.svg.arc()
@@ -984,6 +984,10 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				return;
 			}
 
+			var total = d3.sum(data, function(d) {
+				return d[options.y.key];
+			});
+
 			var colors = d3.scale.category20();
 			var g = scope.svg.selectAll('.' + scope.classPrefix + '-arc')
 	      .data(scope.pie(data))
@@ -991,11 +995,72 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 	      .attr('class', scope.classPrefix + '-arc');
 
 			g.append('path')
-	      .attr('d', scope.arc)
-	      .style('fill', function(d) {
+				.style('opacity', 0)
+				.style('fill', function(d) {
 					return colors(d.data[options.x.key]);
+				})
+				.style('stroke', options.borderColor)
+				.interrupt()
+				.transition()
+				.duration(1500)
+				.ease('cubic-in-out')
+	      .attrTween('d', function(d) {
+					return _tweenPie(scope, options, d);
+				})
+				.style('opacity', 1);
+
+			g.append('text')
+	      .attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
+	      .attr('dy', '-0.75em')
+	      .style('text-anchor', 'middle')
+	      .text(function(d) {
+					var text;
+
+					if(options.showPercent) {
+						var format = d3.format('%');
+						text = format(d.data[options.y.key]/total);
+					} else {
+						text = d.data[options.y.key];
+					}
+					return text;
 				});
+
+			g.append('text')
+				.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
+				.attr('dy', '.75em')
+				.style('text-anchor', 'middle')
+				.text(function(d) {
+					return d.data[options.x.key];
+				});
+
+			this.setStyles(scope, options);
+		},
+
+		setStyles: function(scope, options) {
+			scope.svg.selectAll('.' + scope.classPrefix + '-arc text')
+				.style('fill', options.axis.color)
+				.style('font-weight', options.axis.fontWeight);
+
+			scope.svg
+				.style('font-family', options.fontFamily)
+				.style('font-size', options.fontSize);
 		}
+	};
+});
+
+angular.module('angular-d3-charts').factory('lineHelpers', function ($log, d3Helpers, svgHelpers) {
+	/*
+	var _idFunction = function(d) {
+		return d.id;
+	};
+	*/
+
+	return {
+		addAxis: function(scope, options) {
+			svgHelpers.addXAxis(scope, options);
+			svgHelpers.addYAxis(scope, options);
+			svgHelpers.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
+		},
 	};
 });
 
@@ -1041,6 +1106,135 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.y(scope.y)
 				.scaleExtent([0.5, 100])
 				.on('zoom', behavior);
+		},
+
+		addXAxis: function(scope, options) {
+			scope.xl = scope.svg.append('g')
+				.attr('class', 'x axis');
+
+			scope.xlLeftOffset = 0;
+			if(options.y.position === 'left') {
+				scope.xlLeftOffset = 30;
+				if(options.y.orient === 'right') {
+					scope.xlLeftOffset += 10;
+				}
+			}
+
+			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
+				switch(options.x.position) {
+					case 'top':
+						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'bottom'? 0:20) + ')');
+						break;
+					default:
+						if(!d3Helpers.isDefined(options.x.position) || !d3Helpers.isString(options.x.position) ||
+							options.x.position !== 'bottom') {
+							$log.warn('[Angular - D3] X Axis position must be a string. Setting default value "bottom"');
+							options.x.position = 'bottom';
+						}
+						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
+							(options.height + (options.x.orient === 'bottom'? 0:20))+ ')');
+						break;
+				}
+			} else if(d3Helpers.isNumber(options.x.position)) {
+				scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
+					(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
+			}
+
+			scope.xl.call(scope.xAxis);
+
+			if(d3Helpers.isDefined(options.x.label) && options.x.label !== false) {
+				scope.xl.append('text')
+					.attr('class', 'label')
+					.attr('transform', 'translate(' + (options.width) + ')')
+					.attr('dx', '0.8em')
+					.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
+					.style('text-anchor', 'start')
+					.style('font-size', '1.1em')
+					.style('font-weight', 'bold')
+					.text(options.x.label);
+			}
+		},
+
+		addYAxis: function(scope, options) {
+			scope.yl = scope.svg.append('g')
+				.attr('class', 'y axis');
+
+			scope.ylTopOffset = 0;
+			if(options.x.position === 'top') {
+				scope.ylTopOffset = 30;
+			}
+
+			if(!d3Helpers.isDefined(options.y.position) || d3Helpers.isString(options.y.position)) {
+				switch(options.y.position) {
+					case 'right':
+						scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'left'? 20:0)) + ',' +
+								(scope.ylTopOffset) + ')');
+						break;
+					default:
+						if(!d3Helpers.isDefined(options.y.position) || !d3Helpers.isString(options.y.position) ||
+							options.y.position !== 'left') {
+							$log.warn('[Angular - D3] Y Axis position must be a string. Setting default value "left"');
+							options.y.position = 'left';
+						}
+						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
+								(scope.ylTopOffset) + ')');
+						break;
+				}
+			} else if(d3Helpers.isNumber(options.y.position)) {
+				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
+						(scope.ylTopOffset) + ')');
+			}
+
+			scope.yl.call(scope.yAxis);
+
+			if(d3Helpers.isDefined(options.y.label) && options.y.label !== false) {
+				scope.yl.append('text')
+					.attr('class', 'label')
+					.attr('dy', options.y.position === 'right'? 4:(options.x.position === 'top'? 0:'-1em'))
+					.attr('x', options.y.position === 'right'? '1.5em':'1em')
+					.attr('y', options.x.position === 'top'? options.height:0)
+					.style('text-anchor', 'start')
+					.style('font-size', '1.1em')
+					.style('font-weight', 'bold')
+					.text(options.y.label);
+			}
+		},
+
+		addSubdivideTicks: function(g, scale, axis, options) {
+			g.selectAll('.tick.minor')
+				.classed('minor', false)
+				.selectAll('text')
+				.style('display', null)
+				.style('stroke-width', 0);
+			if(options.scale !== 'sqrt' && options.scale !== 'linear') {
+				return;
+			}
+
+			g.selectAll('.tick')
+				.data(scale.ticks(options.ticks), function(d) { return d; })
+				.exit()
+				.classed('minor', true)
+				.selectAll('text')
+				.style('display', 'none');
+
+			switch(axis.orient()) {
+				case 'left':
+					g.selectAll('.tick.minor line')
+						.attr('x2', -4);
+					break;
+				case 'bottom':
+					g.selectAll('.tick.minor line')
+						.attr('y2', 4);
+					break;
+				case 'top':
+					g.selectAll('.tick.minor line')
+						.attr('y2', -4);
+					break;
+				case 'right':
+					g.selectAll('.tick.minor line')
+						.attr('x2', 4);
+					break;
+			}
 		},
 
 		updateStyles: function(scope, options) {
