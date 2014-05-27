@@ -52,10 +52,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			var data  = d3Helpers.getDataFromScope(scope, options);
-			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], 0.2);
+			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], options.barGap);
 			scope.xAxis.tickFormat(options.x.tickFormat);
-			if(d3Helpers.isDefined(scope.chartData)) {
-				this.updateData(scope.chartData);
+			if(d3Helpers.isDefined(scope.data)) {
+				this.updateData(scope.data, options);
 			}
 		},
 
@@ -132,7 +132,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 			scope.yAxis.tickFormat(options.y.tickFormat);
 			if(d3Helpers.isDefined(scope.data)) {
-				this.updateData(scope.data);
+				this.updateData(scope.data, options);
 			}
 		},
 
@@ -140,6 +140,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		},
 
 		updateData: function(scope, options) {
+			if(!d3Helpers.isDefined(scope.x) || !d3Helpers.isDefined(scope.y)) {
+				return;
+			}
 			var data = d3Helpers.getDataFromScope(scope, options);
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for bars');
@@ -158,7 +161,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			};
 
 			var domain = data.map(function(d) { return d[options.x.key]; });
-			scope.x.domain(domain).rangeBands([0, options.width], 0.2);
+			scope.x.domain(domain);
 			$log.debug('[Angular - D3] x domain:', domain);
 
 			var totals = [];

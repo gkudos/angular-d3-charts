@@ -5,11 +5,11 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 			radius: 0,
 			x: {
 				key: 'x',
-				label: 'x',
+				label: 'x'
 			},
 			y: {
 				key: 'y',
-				label: 'y',
+				label: 'y'
 			},
 			defaultData: [{
 				id: 1,
@@ -61,7 +61,7 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 				newDefaults.radius = d3Helpers.isDefined(userDefaults.radius)?  userDefaults.radius:newDefaults.radius;
 				newDefaults.showPercent = d3Helpers.isDefined(userDefaults.showPercent)?  userDefaults.showPercent:newDefaults.showPercent;
 				newDefaults.borderColor = d3Helpers.isDefined(userDefaults.borderColor)?  userDefaults.borderColor:newDefaults.borderColor;
-				newDefaults.pieAnimation = d3Helpers.isDefined(userDefaults.pieAnimation)?  userDefaults.pieAnimation:newDefaults.pieAnimation;				
+				newDefaults.pieAnimation = d3Helpers.isDefined(userDefaults.pieAnimation)?  userDefaults.pieAnimation:newDefaults.pieAnimation;
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);

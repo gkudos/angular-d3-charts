@@ -54,6 +54,10 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				}
 			}
 
+			if(scope.type === 'oneAxisBar') {
+				scope.xlLeftOffset = 0;
+			}
+
 			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
 				switch(options.x.position) {
 					case 'top':

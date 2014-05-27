@@ -11,6 +11,7 @@
 						// Nothing here!
 						angular.extend($scope, {
 							options: {
+								barGap: 0.7,
 								axis: {
 									stroke: 'red',
 									color: '#4872A8',
@@ -23,12 +24,25 @@
 									position: 'bottom',
 									label: 'Store'
 								}
-							}
+							},
+							values: [{
+							  id: 1,
+							  x: 'Ene',
+							  y: [ 54 ]
+						  }, {
+							  id: 2,
+							  x: 'Feb',
+							  y: [ 12 ]
+						  }, {
+							  id: 3,
+							  x: 'Mar',
+							  y: [ 152 ]
+						  }]
 						});
 				}]);
 		</script>
 	</head>
 	<body ng-controller="DemoController">
-		<a3oabar width="300px" height="300px" options="options"></a3oabar>
+		<a3oabar width="300px" height="300px" options="options" data="values"></a3oabar>
 	</body>
 </html>
