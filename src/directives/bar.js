@@ -11,6 +11,10 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 			$log.info('[Angular - D3] Bar scope controller', $scope);
 		},
 		link: function(scope, element, attrs) {
+			if(!jQuery) {
+				$log.error('JQuery is not loaded');
+				return;
+			}
 			scope.container = element;
 			scope.type = 'bar';
 			scope.classPrefix = 'a3bar';

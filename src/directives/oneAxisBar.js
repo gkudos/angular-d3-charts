@@ -11,6 +11,10 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			$log.info('[Angular - D3] One Axis Bar scope controller', $scope);
 		},
 		link: function(scope, element, attrs) {
+			if(!jQuery) {
+				$log.error('JQuery is not loaded');
+				return;
+			}
 			scope.container = element;
 			scope.type = 'oneAxisBar';
 			scope.classPrefix = 'a3oabar';

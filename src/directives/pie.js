@@ -11,6 +11,10 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			$log.info('[Angular - D3] Pie scope controller', $scope);
 		},
 		link: function(scope, element, attrs) {
+			if(!jQuery) {
+				$log.error('JQuery is not loaded');
+				return;
+			}
 			scope.container = element;
 			scope.type = 'pie';
 			scope.classPrefix = 'a3pie';
@@ -28,7 +32,6 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			//svgHelpers.updateStyles(scope, options);
 
 			pieHelpers.updateData(scope, options);
-
 		}
 	};
 });
