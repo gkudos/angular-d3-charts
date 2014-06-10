@@ -20,8 +20,8 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			svg.append('clipPath')
 				.attr('id', scope.idClip)
 				.append('rect')
-				.attr('width', options.width - 1)
-				.attr('height', options.height - 20);
+				.attr('width', options.width)
+				.attr('height', options.height);
 			scope.svg = svg;
 			return svg;
 		},

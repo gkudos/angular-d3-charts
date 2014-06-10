@@ -228,32 +228,61 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				.append('g')
 				.attr('class', scope.classPrefix + '-group-bar');
 
+			var colors = d3.scale.category20();
 			var bars = series.selectAll('.' + scope.classPrefix + '-bar')
 				.data(mapFunction)
 				.interrupt()
 				.enter()
-				.append('rect')
+				.append(d3Helpers.isDefined(options.barPath)? 'g':'rect')
 				.attr('class', scope.classPrefix + '-bar');
 
-			var colors = d3.scale.category20();
-			bars.attr('width', x0.rangeBand())
-				.attr('x', function(d, i) {
-					return scope.x(d.x) + x0(i);
-				})
-				.attr('height', 0)
-				.style('opacity', 0)
-				.style('fill', function(d, i) {
-					var color = d3.rgb(colors(i));
-					var factor = 0.5 + d.y/max;
-					return factor <= 1? color.brighter(1-factor):color.darker(factor);
-				})
-				.transition()
-				.ease('cubic-in-out')
-				.duration(1000)
-				.attr('height', function(d) {
-					return Math.abs(scope.y(d.y) - scope.y(0));
-				})
-				.style('opacity', 1);
+			if(d3Helpers.isDefined(options.barPath)) {
+				bars
+					.attr('transform', function(d, i) {
+						var percentH = (scope.y(d.y) - scope.y(0))/115;
+						return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ')';
+					});
+				bars.append('path').attr('d', options.barPath)
+					.attr('fill-rule', 'evenodd')
+					.attr('transform', 'scale(0)')
+					.style('fill', function(d, i) {
+						var color = d3.rgb(colors(i));
+						return color;
+					})
+					.style('stroke', function(d, i) {
+						return d3.rgb(colors(i)).darker();
+					})
+					.style('stroke-width', 1)
+					.style('opacity', 0)
+					.transition()
+					.ease('sin-in-out')
+					.duration(1000)
+					.attrTween('transform', function(d, i, a) {
+						//var percentW = x0.rangeBand()/102;
+						var percentH = (scope.y(d.y) - scope.y(0))/115;
+						return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
+					})
+					.style('opacity', 0.8);
+			} else {
+				bars.attr('width', x0.rangeBand())
+					.attr('x', function(d, i) {
+						return scope.x(d.x) + x0(i);
+					})
+					.attr('height', 0)
+					.style('opacity', 0)
+					.style('fill', function(d, i) {
+						var color = d3.rgb(colors(i));
+						var factor = 0.5 + d.y/max;
+						return factor <= 1? color.brighter(1-factor):color.darker(factor);
+					})
+					.transition()
+					.ease('cubic-in-out')
+					.duration(1000)
+					.attr('height', function(d) {
+						return Math.abs(scope.y(d.y) - scope.y(0));
+					})
+					.style('opacity', 1);
+			}
 
 			if(scope.type === 'oneAxisBar') {
 				var helpTextContainer = scope.svg.select('g.' + scope.classPrefix +'-helptext');

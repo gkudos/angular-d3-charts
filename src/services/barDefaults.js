@@ -4,6 +4,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 		angular.extend(commonDefaults, {
 			series: ['A', 'B', 'C', 'D'],
 			barGap: 0.2,
+			barPath: null,
 			x: {
 				tickFormat: null,
 				tickSize: 6,
@@ -77,6 +78,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			if (isDefined(userDefaults)) {
 				d3Helpers.setDefaults(newDefaults, userDefaults);
 				newDefaults.barGap = d3Helpers.isDefined(userDefaults.barGap)?  userDefaults.barGap:newDefaults.barGap;
+				newDefaults.barPath = d3Helpers.isDefined(userDefaults.barPath)?  userDefaults.barPath:newDefaults.barPath;
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);

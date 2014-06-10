@@ -24,6 +24,7 @@ module.exports = function(grunt) {
 					'src/directives/pie.js',
 					'src/directives/line.js',
           'src/services/d3Helpers.js',
+          'src/services/iconHelpers.js',
           'src/services/barDefaults.js',
 					'src/services/pieDefaults.js',
 					'src/services/lineDefaults.js',
