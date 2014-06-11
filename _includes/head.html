@@ -1,12 +1,26 @@
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="{{ site.description }}">
+		<meta name="keywords" content="" />
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
+    <!--[if lte IE 8]><script src="{{ "js/lib/html5shiv/html5shiv.js" | prepend: site.baseurl }}"></script><![endif]-->
+		<script src="{{ "js/lib/jquery/jquery.js" | prepend: site.baseurl }}"></script>
+		<script src="{{ "js/lib/jquery/jquery.dropotron.min.js" | prepend: site.baseurl }}"></script>
+		<script src="{{ "js/lib/skeljs/dist/skel.min.js" | prepend: site.baseurl }}"></script>
+		<script src="{{ "js/lib/skeljs/dist/skel-layers.min.js" | prepend: site.baseurl }}"></script>
+    <script src="{{ "js/init.js" | prepend: site.baseurl }}"></script>
 
+    <noscript>
+			<link rel="stylesheet" href="{{ "js/lib/skeljs/dist/skel-noscript.css" | prepend: site.baseurl }}" />
+      <link rel="stylesheet" href="{{ "css/style-noscript.css" | prepend: site.baseurl }}" />
+		</noscript>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ "/css/style.css" | prepend: site.baseurl }}">
+    <!--[if lte IE 8]><link rel="stylesheet" href="{{ "css/ie/v8.css" | prepend: site.baseurl }}" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="{{ "css/ie/v9.css" | prepend: site.baseurl }}" /><![endif]-->
 </head>

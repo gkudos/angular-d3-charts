@@ -1,0 +1,14 @@
+{
+  "name": "skeljs",
+  "homepage": "https://github.com/jmmerino/skelJS",
+  "version": "0.4.7",
+  "_release": "0.4.7",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.4.7",
+    "commit": "dc8a96a5ee1f03d65b01938917a488cb7fdc7f28"
+  },
+  "_source": "git://github.com/jmmerino/skelJS.git",
+  "_target": "0.4.x",
+  "_originalSource": "skeljs"
+}

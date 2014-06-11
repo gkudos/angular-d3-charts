@@ -9,3 +9,6 @@ url: "http://gkudos.github.com/angular-d3-charts"
 # Build settings
 markdown: kramdown
 permalink: pretty
+
+sass:
+ sass_dir: _sass
