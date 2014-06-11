@@ -11,6 +11,27 @@ module.exports = function(grunt) {
       '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
       ' Licensed <%= pkg.license %> */\n',
     // Task configuration.
+    shell: {
+      options: {
+        stdout: true
+      },
+      selenium: {
+        command: 'node_modules/protractor/bin/webdriver-manager start',
+        options: {
+          stdout: false,
+          async: true
+        }
+      },
+      protractor_update: {
+        command: 'node_modules/protractor/bin/webdriver-manager update'
+      },
+      npm_install: {
+        command: 'npm install'
+      }
+    },
+    bower: {
+      install: {}
+    },
     concat: {
       options: {
         banner: '(function() {\n\n"use strict";\n\n',
@@ -138,6 +159,10 @@ module.exports = function(grunt) {
 						afterEach : false,
 						describe : false,
 						xdescribe : false,
+            protractor: false,
+            browser: false,
+            element: false,
+            by: false,
 
 						// Angular mocks
 						module: false,
@@ -148,6 +173,8 @@ module.exports = function(grunt) {
       gruntfile: {
         src: 'Gruntfile.js',
         options: {
+          indent: false,
+
           globals: {
             require: false
           }
@@ -161,6 +188,16 @@ module.exports = function(grunt) {
         singleRun: true
       }
 		},
+    protractor: {
+      options: {
+        keepAlive: false,
+        configFile: 'test/protractor.conf.js',
+        args: {
+          specs: [ 'test/e2e/*.js' ],
+        }
+      },
+      run: {},
+    },
     watch: {
       options : {
         livereload: 7777
@@ -193,5 +230,8 @@ module.exports = function(grunt) {
   //development
   grunt.registerTask('dev', ['connect:devserver', 'open:devserver', 'watch:source']);
 	grunt.registerTask('build', ['jshint:source', 'concat:dist', 'uglify']);
-	grunt.registerTask('travis', ['build', 'test:unit']);
+	grunt.registerTask('travis', ['build', 'test']);
+
+  //installation-related
+  grunt.registerTask('install', ['shell:npm_install', 'bower:install', 'shell:protractor_update']);
 };

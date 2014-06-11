@@ -21,6 +21,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				tickSize: 6,
 				orient: 'left',
 				position: 'left',
+				// Possible Values ['ttb', 'btb'] => ['top to bottom', 'bottom to top']
+				direction: 'ttb',
 				key: 'y',
 				label: 'y',
 				ticks: 5,

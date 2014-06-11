@@ -24,8 +24,9 @@
                 },
 
                 y: {
-                  position: 'left',
+                  position: 'right',
                   orient: 'right',
+                  direction: 'btt',
                   label: 'Products'
                 }
               },
@@ -57,13 +58,13 @@
       			  }, {
       				  id: 7,
       				  x: 'Jul',
-      				  y: [ 74 ]
+      				  y: [ 200 ]
       			  }]
             });
         }]);
     </script>
   </head>
   <body ng-controller="DemoController">
-    <a3bar width="300px" height="300px" options="options" data="values"></a3bar>
+    <a3bar width="600px" height="100px" options="options" data="values"></a3bar>
   </body>
 </html>

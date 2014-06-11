@@ -107,7 +107,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						};
 					}
 					scope.yAxis.ticks(options.y.ticks);
-					scope.y.domain([0.1, 1000]);
+					scope.y.domain(options.y.direction === 'btt'? [1000, 0.1]:[0.1, 1000]);
 					break;
 				case 'time':
 					if(!d3Helpers.isDefined(options.y.tickFormat)) {
@@ -127,7 +127,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					break;
 				default:
 					scope.yAxis.ticks(options.y.ticks + options.y.ticks * options.y.tickSubdivide);
-					scope.y.domain([0, 100]);
+					scope.y.domain(options.y.direction === 'btt'? [100, 0]:[0, 100]);
 					break;
 			}
 			scope.yAxis.tickFormat(options.y.tickFormat);
@@ -194,7 +194,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				max = max instanceof Date? max:(max + Math.abs(max/2));
 			}
 
-			scope.y.domain([min, max]);
+			scope.y.domain(options.y.direction === 'btt'? [max, min]:[min, max]);
 			if(min < max) {
 				scope.y.nice();
 			}
@@ -239,8 +239,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(d3Helpers.isDefined(options.barPath)) {
 				bars
 					.attr('transform', function(d, i) {
-						var percentH = (scope.y(d.y) - scope.y(0))/115;
-						return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ')';
+						var iconHeight = 115;
+						var percentH = Math.abs((scope.y(d.y) - scope.y(0))/iconHeight);
+						var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
+						return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
 					});
 				bars.append('path').attr('d', options.barPath)
 					.attr('fill-rule', 'evenodd')
@@ -259,7 +261,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					.duration(1000)
 					.attrTween('transform', function(d, i, a) {
 						//var percentW = x0.rangeBand()/102;
-						var percentH = (scope.y(d.y) - scope.y(0))/115;
+						var percentH = Math.abs((scope.y(d.y) - scope.y(0))/115);
 						return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
 					})
 					.style('opacity', 0.8);

@@ -14,6 +14,7 @@
   "devDependencies": {
     "matchdep": "*",
     "grunt": "~0.4.2",
+    "grunt-bower-task": "*",
     "grunt-contrib-connect": "*",
     "grunt-contrib-jshint": "~0.7.2",
     "grunt-contrib-watch": "~0.5.3",
@@ -21,11 +22,14 @@
     "grunt-contrib-uglify": "~0.2.7",
 		"grunt-karma": "*",
     "grunt-open": "*",
+    "grunt-protractor-runner": "*",
+    "grunt-shell": "*",
     "karma": "~0.12.16",
     "karma-jasmine": "~0.1.5",
     "karma-firefox-launcher": "~0.1.3",
     "karma-chrome-launcher": "~0.1.3",
     "karma-phantomjs-launcher": "~0.1.4",
+    "protractor": "*",
     "jshint-stylish": "~0.2.0"
   },
 	"scripts": {
