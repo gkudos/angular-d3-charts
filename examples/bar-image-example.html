@@ -8,11 +8,12 @@
     <script>
         var app = angular.module("demoapp", ['angular-d3-charts']);
         app.controller("DemoController", [ "$scope", "iconHelpers", function($scope, iconHelpers) {
-            // Nothing here!
             angular.extend($scope, {
               options: {
-                barPath: iconHelpers.tree,
-                barGap: 0.5,
+                bar: {
+                  gap: 0.5,
+                  path: iconHelpers.tree
+                },
                 axis: {
                   stroke: 'red',
                 },

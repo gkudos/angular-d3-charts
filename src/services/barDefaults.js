@@ -3,8 +3,11 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
 			series: ['A', 'B', 'C', 'D'],
-			barGap: 0.2,
-			barPath: null,
+			bar: {
+				gap: 0.2,
+				path: null,
+				colors: d3.scale.category20()
+			},
 			x: {
 				tickFormat: null,
 				tickSize: 6,
@@ -29,7 +32,11 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				tickSubdivide: 4
 			},
 			axis: {
+				// Possible Values ['bottom', 'top']
+				guidePosition: 'top',
+				showValues: true,
 				valuesColor: '#000',
+				showPercent: true,
 				percentColor: '#000',
 				label: {
 					color: '#000',
@@ -79,8 +86,10 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 
 			if (isDefined(userDefaults)) {
 				d3Helpers.setDefaults(newDefaults, userDefaults);
-				newDefaults.barGap = d3Helpers.isDefined(userDefaults.barGap)?  userDefaults.barGap:newDefaults.barGap;
-				newDefaults.barPath = d3Helpers.isDefined(userDefaults.barPath)?  userDefaults.barPath:newDefaults.barPath;
+
+				if(isDefined(userDefaults.bar)) {
+					angular.extend(newDefaults.bar, userDefaults.bar);
+				}
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);

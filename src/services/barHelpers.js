@@ -17,12 +17,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			scope.guide = scope.svg.append('g')
 				.attr('class', 'guide');
 
+			var guidePosition =
+				options.axis.guidePosition === 'bottom'? options.height*1:(scope.ylTopOffset - options.height*0.03);
 			scope.guide
 				.append('line')
 				.attr('x1', scope.xlLeftOffset)
 				.attr('x2', options.width + scope.xlLeftOffset)
-				.attr('y1', scope.ylTopOffset - options.height*0.03)
-				.attr('y2', scope.ylTopOffset - options.height*0.03)
+				.attr('y1', guidePosition)
+				.attr('y2', guidePosition)
 				.style('stroke', '#BBB')
 				.style('stroke-width', 1)
 				.style('shape-rendering', 'crispEdges');
@@ -52,7 +54,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			var data  = d3Helpers.getDataFromScope(scope, options);
-			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], options.barGap);
+			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], options.bar.gap);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.data)) {
 				this.updateData(scope.data, options);
@@ -79,7 +81,15 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					break;
 			}
 
-			scope.y.range([0, options.height - (scope.type === 'oneAxisBar'? options.height*0.2:0)]);
+			var dy = 0;
+			if(scope.type === 'oneAxisBar') {
+				dy = options.height*0.2;
+
+				if(options.axis.guidePosition === 'bottom') {
+					dy += options.height*0.05;
+				}
+			}
+			scope.y.range([0, options.height - dy]);
 			if(!d3Helpers.isDefined(scope.yAxis)) {
 				if(!d3Helpers.isDefined(options.y.orient) || !d3Helpers.isString(options.y.orient)) {
 					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "left"');
@@ -229,14 +239,19 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				.attr('class', scope.classPrefix + '-group-bar');
 
 			var colors = d3.scale.category20();
+			if(d3Helpers.isDefined(options.bar.colors)) {
+				colors = d3Helpers.isArray(options.bar.colors)? d3.scale.ordinal().range(options.bar.colors):colors;
+				colors = d3Helpers.isString(options.bar.colors)? d3.scale.ordinal().range([options.bar.colors]):colors;
+				colors = d3Helpers.isFunction(options.bar.colors)? options.bar.colors:colors;
+			}
 			var bars = series.selectAll('.' + scope.classPrefix + '-bar')
 				.data(mapFunction)
 				.interrupt()
 				.enter()
-				.append(d3Helpers.isDefined(options.barPath)? 'g':'rect')
+				.append(d3Helpers.isDefined(options.bar.path)? 'g':'rect')
 				.attr('class', scope.classPrefix + '-bar');
 
-			if(d3Helpers.isDefined(options.barPath)) {
+			if(d3Helpers.isDefined(options.bar.path)) {
 				bars
 					.attr('transform', function(d, i) {
 						var iconHeight = 115;
@@ -244,7 +259,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
 						return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
 					});
-				bars.append('path').attr('d', options.barPath)
+				bars.append('path')
+					.attr('class', 'a3bar-bar-path')
+					.attr('d', options.bar.path)
 					.attr('fill-rule', 'evenodd')
 					.attr('transform', 'scale(0)')
 					.style('fill', function(d, i) {
@@ -306,39 +323,45 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					.append('g')
 					.attr('class', scope.classPrefix + '-values');
 
-				series.selectAll('.' + scope.classPrefix + '-val')
-					.data(mapFunction)
-					.interrupt()
-					.enter()
-					.append('text')
-					.attr('x', function(d, i) {
-						return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
-					})
-					.attr('class', scope.classPrefix + '-val')
-					.style('text-anchor', 'middle')
-					.style('fill', options.axis.valuesColor)
-					.text(function(d) {
-						return d.y;
-					});
+				if(options.axis.showValues) {
+					series.selectAll('.' + scope.classPrefix + '-val')
+						.data(mapFunction)
+						.interrupt()
+						.enter()
+						.append('text')
+						.attr('x', function(d, i) {
+							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+						})
+						.attr('dy', !options.axis.showPercent? '0.5em':0)
+						.attr('class', scope.classPrefix + '-val')
+						.style('text-anchor', 'middle')
+						.style('fill', options.axis.valuesColor)
+						.text(function(d) {
+							return d.y;
+						});
+				}
 
-				series.selectAll('.' + scope.classPrefix + '-percent')
-					.data(mapFunction)
-					.interrupt()
-					.enter()
-					.append('text')
-					.attr('x', function(d, i) {
-						return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
-					})
-					.attr('y', options.height*0.065)
-					.attr('class', scope.classPrefix + '-percent')
-					.style('text-anchor', 'middle')
-					.style('font-size', '0.85em')
-					.style('font-weight', 'bold')
-					.style('fill', options.axis.percentColor)
-					.text(function(d, i) {
-						var format = d3.format('%');
-						return format(d.y/totals[i]);
-					});
+				if(options.axis.showPercent) {
+					series.selectAll('.' + scope.classPrefix + '-percent')
+						.data(mapFunction)
+						.interrupt()
+						.enter()
+						.append('text')
+						.attr('x', function(d, i) {
+							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+						})
+						.attr('y', options.height*0.065)
+						.attr('dy', !options.axis.showValues? '-0.5em':0)
+						.attr('class', scope.classPrefix + '-percent')
+						.style('text-anchor', 'middle')
+						.style('font-size', '0.85em')
+						.style('font-weight', 'bold')
+						.style('fill', options.axis.percentColor)
+						.text(function(d, i) {
+							var format = d3.format('%');
+							return format(d.y/totals[i]);
+						});
+				}
 			}
 
 			svgHelpers.updateStyles(scope, options);

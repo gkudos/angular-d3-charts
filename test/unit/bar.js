@@ -48,10 +48,13 @@ describe('Directive a3bar', function() {
 		element = $compile(element)(scope);
 		angular.extend(scope, {
 			options: {
-				barPath: iconHelpers.tree
+				bar: {
+					path: iconHelpers.tree
+				}
 			}
 		});
 		scope.$digest();
 		expect(element.find('svg').size()).toEqual(1);
+		expect(element.find('svg .a3bar-bars .a3bar-group-bar .a3bar-bar').size()).toEqual(9);
 	});
 });
