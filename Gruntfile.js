@@ -30,7 +30,11 @@ module.exports = function(grunt) {
       }
     },
     bower: {
-      install: {}
+      install: {
+        options: {
+          targetDir: './js/lib'        
+        }
+      }
     },
     concat: {
       options: {

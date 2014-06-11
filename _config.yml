@@ -1,0 +1,11 @@
+# Site settings
+title: Angular D3 Directives
+email: michaelsalgado@gkudos.com
+username: elesdoar
+description: "Angular directives for D3 charts."
+baseurl: "/angular-d3-charts"
+url: "http://gkudos.github.com/angular-d3-charts"
+
+# Build settings
+markdown: kramdown
+permalink: pretty
