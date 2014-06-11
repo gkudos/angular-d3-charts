@@ -196,7 +196,7 @@ module.exports = function(grunt) {
           specs: [ 'test/e2e/*.js' ],
         }
       },
-      run: {},
+      run: {}
     },
     watch: {
       options : {
@@ -230,7 +230,7 @@ module.exports = function(grunt) {
   //development
   grunt.registerTask('dev', ['connect:devserver', 'open:devserver', 'watch:source']);
 	grunt.registerTask('build', ['jshint:source', 'concat:dist', 'uglify']);
-	grunt.registerTask('travis', ['build', 'test']);
+	grunt.registerTask('travis', ['build', 'test:unit']);
 
   //installation-related
   grunt.registerTask('install', ['shell:npm_install', 'bower:install', 'shell:protractor_update']);
