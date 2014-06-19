@@ -31,7 +31,11 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			pieHelpers.addArc(scope, options);
 			//svgHelpers.updateStyles(scope, options);
 
-			pieHelpers.updateData(scope, options);
+			//pieHelpers.updateData(scope, options);
+
+			scope.$watch('data', function() {
+				pieHelpers.updateData(scope, options);
+			});
 		}
 	};
 });

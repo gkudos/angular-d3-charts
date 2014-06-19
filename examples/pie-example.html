@@ -6,20 +6,54 @@
 		<script src="../bower_components/d3/d3.min.js"></script>
 		<script src="../dist/angular-d3-charts.js"></script>
 		<script>
+				var oldValues = [{
+					id: 1,
+					x: 'Ene',
+					y: 45
+				}, {
+					id: 2,
+					x: 'Feb',
+					y: 275
+				}, {
+					id: 3,
+					x: 'Mar',
+					y: 85
+				}];
 				var app = angular.module("demoapp", ['angular-d3-charts']);
-				app.controller("DemoController", [ "$scope", function($scope) {
+				app.controller("DemoController", [ "$scope", "$log", function($scope, $log) {
 						// Nothing here!
 						angular.extend($scope, {
 							options: {
 								radius: 50,
 								showPercent: true,
-								pieAnimation: 'crossfade'
+								//pieAnimation: 'crossfade'
+							},
+
+							values: [{
+								id: 1,
+								x: 'Ene',
+								y: 36
+							}, {
+								id: 2,
+								x: 'Feb',
+								y: 87
+							}, {
+								id: 3,
+								x: 'Mar',
+								y: 63
+							}],
+
+							changeValues: function() {
+								var aux = $scope.values;
+								$scope.values = oldValues;
+								oldValues = aux;
 							}
 						});
 				}]);
 		</script>
 	</head>
 	<body ng-controller="DemoController">
-		<a3pie width="300px" height="300px" options="options"></a3pie>
+		<a3pie width="300px" height="300px" options="options" data="values"></a3pie>
+		<button ng-click="changeValues()">Change Values</button>
 	</body>
 </html>

@@ -6,6 +6,19 @@
 		<script src="../bower_components/d3/d3.min.js"></script>
 		<script src="../dist/angular-d3-charts.js"></script>
 		<script>
+				var oldValues = [{
+					id: 1,
+					x: 'Ene',
+					y: [ 36 ]
+				}, {
+					id: 2,
+					x: 'Feb',
+					y: [ 58 ]
+				}, {
+					id: 3,
+					x: 'Mar',
+					y: [ 21 ]
+				}];
 				var app = angular.module("demoapp", ['angular-d3-charts']);
 				app.controller("DemoController", [ "$scope", "iconHelpers", function($scope, iconHelpers) {
 						angular.extend($scope, {
@@ -44,12 +57,19 @@
 							  id: 3,
 							  x: 'Mar',
 							  y: [ 152 ]
-						  }]
+						  }],
+
+							changeValues: function() {
+								var aux = $scope.values;
+								$scope.values = oldValues;
+								oldValues = aux;
+							}
 						});
 				}]);
 		</script>
 	</head>
 	<body ng-controller="DemoController">
 		<a3oabar width="400px" height="150px" options="options" data="values"></a3oabar>
+		<button ng-click="changeValues()">Change Values</button>
 	</body>
 </html>
