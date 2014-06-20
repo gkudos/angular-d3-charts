@@ -7,6 +7,23 @@
     <script src="../dist/angular-d3-charts.js"></script>
     <script>
         var app = angular.module("demoapp", ['angular-d3-charts']);
+        var oldValues = [{
+          id: 1,
+          x: 'Fruits',
+          y: [ 13, 45, 98 ]
+        }, {
+          id: 2,
+          x: 'Vegetables',
+          y: [ 53, 234, 453 ]
+        }, {
+          id: 3,
+          x: 'Meet',
+          y: [ 300, 34, 13 ]
+        }, {
+          id: 4,
+          x: 'Oils',
+          y: [ 34, 150, 65 ]
+        }];
         app.controller("DemoController", [ "$scope", function($scope) {
             // Nothing here!
             angular.extend($scope, {
@@ -26,12 +43,36 @@
                   orient: 'right',
                   label: 'Products'
                 }
+              },
+
+              values: [{
+                id: 1,
+                x: 'Fruits',
+                y: [ 54, 0, 879 ],
+                tooltip: 'Fruits tooltip'
+              }, {
+                id: 2,
+                x: 'Vegetables',
+                y: [ 12, 34, 15 ],
+                tooltip: 'Vegetables tooltip'
+              }, {
+                id: 3,
+                x: 'Meet',
+                y: [ 154, 432, 234 ],
+                tooltip: 'Meet tooltip'
+              }],
+
+              changeValues: function() {
+                var aux = $scope.values;
+                $scope.values = oldValues;
+                oldValues = aux;
               }
             });
         }]);
     </script>
   </head>
   <body ng-controller="DemoController">
-    <a3bar width="300px" height="300px" options="options"></a3bar>
+    <a3bar width="300px" height="300px" options="options" data="values"></a3bar>
+    <button ng-click="changeValues()">Change Values</button>
   </body>
 </html>

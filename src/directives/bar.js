@@ -36,7 +36,10 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 			barHelpers.addAxis(scope, options);
 			svgHelpers.updateStyles(scope, options);
 
-			barHelpers.updateData(scope, options);
+			scope.$watch('data', function() {
+				barHelpers.updateData(scope, options);
+			});
+
 		}
 	};
 });

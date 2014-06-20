@@ -33,4 +33,32 @@ describe('Directive a3bar', function() {
 		scope.$digest();
 		expect(element.find('svg .a3pie-arc').size()).toEqual(3);
 	});
+
+	it('Should have 4 arcs for new data', function() {
+		var element = angular.element(directive);
+		element.attr('data', 'values');
+		scope.values = [];
+		element = $compile(element)(scope);
+		scope.$digest();
+		expect(element.find('svg .a3pie-arc').size()).toEqual(3);
+		scope.values = [{
+			id: 1,
+			x: 'Ene',
+			y: 45
+		}, {
+			id: 2,
+			x: 'Feb',
+			y: 275
+		}, {
+			id: 3,
+			x: 'Mar',
+			y: 85
+		}, {
+			id: 4,
+			x: 'Apr',
+			y: 300
+		}];
+		scope.$digest();
+		expect(element.find('svg .a3pie-arc').size()).toEqual(4);
+	});
 });
