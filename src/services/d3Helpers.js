@@ -39,6 +39,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			fontFamily: 'Arial',
 			fontSize: '0.75em',
 			axis: {
+				show: true,
 				stroke: '#000',
 				color: '#000',
 				label: {

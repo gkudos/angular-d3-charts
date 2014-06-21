@@ -6,7 +6,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scale.category20()
+				colors: d3.scale.category20(),
+				subcolors: null
 			},
 			x: {
 				tickFormat: null,
@@ -41,7 +42,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				label: {
 					color: '#000',
 					fontWeight: 'bold'
-				}
+				},
+				show: true
 			},
 			defaultData: [{
 				id: 1,

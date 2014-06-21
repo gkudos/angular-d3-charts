@@ -210,6 +210,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			fontFamily: 'Arial',
 			fontSize: '0.75em',
 			axis: {
+				show: true,
 				stroke: '#000',
 				color: '#000',
 				label: {
@@ -378,7 +379,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scale.category20()
+				colors: d3.scale.category20(),
+				subcolors: null
 			},
 			x: {
 				tickFormat: null,
@@ -413,7 +415,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				label: {
 					color: '#000',
 					fontWeight: 'bold'
-				}
+				},
+				show: true
 			},
 			defaultData: [{
 				id: 1,
@@ -836,9 +839,11 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				colors = d3Helpers.isString(options.bar.colors)? d3.scale.ordinal().range([options.bar.colors]):colors;
 				colors = d3Helpers.isFunction(options.bar.colors)? options.bar.colors:colors;
 			}
+
 			var mapFunction = function(d) {
 				return d[options.y.key].map(function(e) {
 					return {
+						parentId: d.id,
 						x: d[options.x.key],
 						y: e
 					};
@@ -943,20 +948,32 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
-							$log.debug('height:', h);
 							return h? h:0;
+						})
+						.attr('transform', function() {
+							return 'translate(0, ' + (options.y.direction === 'btt'? scope.y.range()[1]:0) + ')';
 						})
 						//.style('opacity', 0)
 						.style('fill', function(d, i) {
 							var color = d3.rgb(colors(i));
 							var factor = 0.5 + d.y/max;
-							return factor <= 1? color.brighter(1-factor):color.darker(factor);
+							var finalColor = factor <= 1? color.brighter(1-factor):color.darker(factor);
+							// TODO Check subcolors.
+							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
 						})
 						.transition()
 						.ease('cubic-in-out')
 						.duration(1000)
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d.y) - scope.y(0));
+						})
+						.attrTween('transform', function(d, i, a) {
+							var h = Math.abs(scope.y(d.y) - scope.y(0));
+							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
+							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
+							return function(t) {
+								return inp(t);
+							};
 						});
 						//.style('opacity', 1);
 				}
@@ -1282,7 +1299,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
 			w += options.legend.show? options.legend.width:0;
-			var h = options.height + options.margin.top + options.margin.bottom + 30;
+			var h = options.height + options.margin.top + options.margin.bottom + (options.axis.show? 30:0);
 
 			options.containerWidth = w;
 			options.containerHeight = h;
@@ -1326,7 +1343,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.attr('class', 'x axis');
 
 			scope.xlLeftOffset = 0;
-			if(options.y.position === 'left') {
+			if(options.axis.show && options.y.position === 'left') {
 				scope.xlLeftOffset = 30;
 				if(options.y.orient === 'right') {
 					scope.xlLeftOffset += 10;
@@ -1377,7 +1394,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.attr('class', 'y axis');
 
 			scope.ylTopOffset = 0;
-			if(options.x.position === 'top') {
+			if(options.axis.show && options.x.position === 'top') {
 				scope.ylTopOffset = 30;
 			}
 
@@ -1457,26 +1474,31 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		updateStyles: function(scope, options) {
 			var stroke = scope.type === 'bar'? options.axis.stroke:null;
 
-			scope.svg.selectAll('.axis path')
-				.style('stroke', stroke)
-				.style('fill', 'none')
-				.style('shape-rendering', 'crispEdges');
+			if(options.axis.show === true) {
+				scope.svg.selectAll('.axis path')
+					.style('stroke', stroke)
+					.style('fill', 'none')
+					.style('shape-rendering', 'crispEdges');
 
-			scope.svg.selectAll('.axis .tick line')
-				.style('stroke', stroke)
-				.style('fill', 'none');
+				scope.svg.selectAll('.axis .tick line')
+					.style('stroke', stroke)
+					.style('fill', 'none');
 
-			scope.svg.selectAll('.axis .tick.minor')
-				.style('stroke', stroke)
-				.style('fill', 'none');
+				scope.svg.selectAll('.axis .tick.minor')
+					.style('stroke', stroke)
+					.style('fill', 'none');
 
-			scope.svg.selectAll('.axis text')
-				.style('fill', options.axis.color)
-				.style('font-weight', options.axis.fontWeight);
+				scope.svg.selectAll('.axis text')
+					.style('fill', options.axis.color)
+					.style('font-weight', options.axis.fontWeight);
 
-			scope.svg.selectAll('.axis .label')
-				.style('fill', options.axis.label.color)
-				.style('font-weight', options.axis.label.fontWeight);
+				scope.svg.selectAll('.axis .label')
+					.style('fill', options.axis.label.color)
+					.style('font-weight', options.axis.label.fontWeight);
+			} else {
+				scope.svg.selectAll('.axis')
+					.style('display', 'none');
+			}
 
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);

@@ -3,7 +3,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
 			w += options.legend.show? options.legend.width:0;
-			var h = options.height + options.margin.top + options.margin.bottom + 30;
+			var h = options.height + options.margin.top + options.margin.bottom + (options.axis.show? 30:0);
 
 			options.containerWidth = w;
 			options.containerHeight = h;
@@ -47,7 +47,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.attr('class', 'x axis');
 
 			scope.xlLeftOffset = 0;
-			if(options.y.position === 'left') {
+			if(options.axis.show && options.y.position === 'left') {
 				scope.xlLeftOffset = 30;
 				if(options.y.orient === 'right') {
 					scope.xlLeftOffset += 10;
@@ -98,7 +98,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.attr('class', 'y axis');
 
 			scope.ylTopOffset = 0;
-			if(options.x.position === 'top') {
+			if(options.axis.show && options.x.position === 'top') {
 				scope.ylTopOffset = 30;
 			}
 
@@ -178,26 +178,31 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		updateStyles: function(scope, options) {
 			var stroke = scope.type === 'bar'? options.axis.stroke:null;
 
-			scope.svg.selectAll('.axis path')
-				.style('stroke', stroke)
-				.style('fill', 'none')
-				.style('shape-rendering', 'crispEdges');
+			if(options.axis.show === true) {
+				scope.svg.selectAll('.axis path')
+					.style('stroke', stroke)
+					.style('fill', 'none')
+					.style('shape-rendering', 'crispEdges');
 
-			scope.svg.selectAll('.axis .tick line')
-				.style('stroke', stroke)
-				.style('fill', 'none');
+				scope.svg.selectAll('.axis .tick line')
+					.style('stroke', stroke)
+					.style('fill', 'none');
 
-			scope.svg.selectAll('.axis .tick.minor')
-				.style('stroke', stroke)
-				.style('fill', 'none');
+				scope.svg.selectAll('.axis .tick.minor')
+					.style('stroke', stroke)
+					.style('fill', 'none');
 
-			scope.svg.selectAll('.axis text')
-				.style('fill', options.axis.color)
-				.style('font-weight', options.axis.fontWeight);
+				scope.svg.selectAll('.axis text')
+					.style('fill', options.axis.color)
+					.style('font-weight', options.axis.fontWeight);
 
-			scope.svg.selectAll('.axis .label')
-				.style('fill', options.axis.label.color)
-				.style('font-weight', options.axis.label.fontWeight);
+				scope.svg.selectAll('.axis .label')
+					.style('fill', options.axis.label.color)
+					.style('font-weight', options.axis.label.fontWeight);
+			} else {
+				scope.svg.selectAll('.axis')
+					.style('display', 'none');
+			}
 
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);

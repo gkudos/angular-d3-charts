@@ -167,9 +167,11 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				colors = d3Helpers.isString(options.bar.colors)? d3.scale.ordinal().range([options.bar.colors]):colors;
 				colors = d3Helpers.isFunction(options.bar.colors)? options.bar.colors:colors;
 			}
+
 			var mapFunction = function(d) {
 				return d[options.y.key].map(function(e) {
 					return {
+						parentId: d.id,
 						x: d[options.x.key],
 						y: e
 					};
@@ -274,20 +276,32 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
-							$log.debug('height:', h);
 							return h? h:0;
+						})
+						.attr('transform', function() {
+							return 'translate(0, ' + (options.y.direction === 'btt'? scope.y.range()[1]:0) + ')';
 						})
 						//.style('opacity', 0)
 						.style('fill', function(d, i) {
 							var color = d3.rgb(colors(i));
 							var factor = 0.5 + d.y/max;
-							return factor <= 1? color.brighter(1-factor):color.darker(factor);
+							var finalColor = factor <= 1? color.brighter(1-factor):color.darker(factor);
+							// TODO Check subcolors.
+							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
 						})
 						.transition()
 						.ease('cubic-in-out')
 						.duration(1000)
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d.y) - scope.y(0));
+						})
+						.attrTween('transform', function(d, i, a) {
+							var h = Math.abs(scope.y(d.y) - scope.y(0));
+							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
+							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
+							return function(t) {
+								return inp(t);
+							};
 						});
 						//.style('opacity', 1);
 				}
