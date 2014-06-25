@@ -398,7 +398,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				tickSize: 6,
 				orient: 'left',
 				position: 'left',
-				// Possible Values ['ttb', 'btb'] => ['top to bottom', 'bottom to top']
+				// Possible Values ['ttb', 'btt'] => ['top to bottom', 'bottom to top']
 				direction: 'ttb',
 				key: 'y',
 				label: 'y',
@@ -493,7 +493,8 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 			radius: 0,
 			x: {
 				key: 'x',
-				label: 'x'
+				label: 'x',
+				show: true
 			},
 			y: {
 				key: 'y',
@@ -943,8 +944,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.style('opacity', 0.8);
 				} else {
 					bars.attr('width', x0.rangeBand())
+						.attr('title', function(d) {
+							var format = d3.format('0,000');
+							return format(d[options.y.key]);
+						})
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i);
+							return scope.x(d[options.x.key]) + x0(i);
 						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
@@ -956,7 +961,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						//.style('opacity', 0)
 						.style('fill', function(d, i) {
 							var color = d3.rgb(colors(i));
-							var factor = 0.5 + d.y/max;
+							var factor = 0.5 + d[options.y.key]/max;
 							var finalColor = factor <= 1? color.brighter(1-factor):color.darker(factor);
 							// TODO Check subcolors.
 							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
@@ -965,10 +970,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.ease('cubic-in-out')
 						.duration(1000)
 						.attr('height', function(d) {
-							return Math.abs(scope.y(d.y) - scope.y(0));
+							return Math.abs(scope.y(d[options.y.key]) - scope.y(0));
 						})
 						.attrTween('transform', function(d, i, a) {
-							var h = Math.abs(scope.y(d.y) - scope.y(0));
+							var h = Math.abs(scope.y(d[options.y.key]) - scope.y(0));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
 							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
 							return function(t) {
@@ -977,6 +982,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						});
 						//.style('opacity', 1);
 				}
+				bars.select('title').remove();
+				bars.append('title')
+					.text(function(d) {
+						var format = d3.format('0,000');
+						return format(d[options.y.key]);
+					});
 			};
 
 			var barGroups = barsContainer.selectAll('.' + scope.classPrefix + '-group-bar')
@@ -1189,7 +1200,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			g.append('text')
 	      .attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-	      .attr('dy', '-0.75em')
+	      .attr('dy', options.x.show? '-0.75em':0)
 				.attr('class', scope.classPrefix + '-arc-val')
 				.style('text-anchor', 'middle')
 	      .text(function(d) {
@@ -1204,14 +1215,16 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return text;
 				});
 
-			g.append('text')
-				.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-				.attr('dy', '.75em')
-				.attr('class', scope.classPrefix + '-arc-label')
-				.style('text-anchor', 'middle')
-				.text(function(d) {
-					return d.data[options.x.key];
-				});
+			if(options.x.show) {
+				g.append('text')
+					.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
+					.attr('dy', '.75em')
+					.attr('class', scope.classPrefix + '-arc-label')
+					.style('text-anchor', 'middle')
+					.text(function(d) {
+						return d.data[options.x.key];
+					});
+			}
 
 			gData.exit()
 				.datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
@@ -1248,20 +1261,22 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					};
 				});
 
-			gData.selectAll('.' + scope.classPrefix + '-arc-label')
-				.text(function() {
-					var d = d3.select(this.parentNode).data()[0];
-					return d.data[options.x.key];
-				})
-				.transition()
-				.duration(750)
-				.attrTween('transform', function(da, i, a) {
-					var d = d3.select(this.parentNode).data()[0];
-					var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-					return function(t) {
-						return inp(t);
-					};
-				});
+			if(options.x.show) {
+				gData.selectAll('.' + scope.classPrefix + '-arc-label')
+					.text(function() {
+						var d = d3.select(this.parentNode).data()[0];
+						return d.data[options.x.key];
+					})
+					.transition()
+					.duration(750)
+					.attrTween('transform', function(da, i, a) {
+						var d = d3.select(this.parentNode).data()[0];
+						var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
+						return function(t) {
+							return inp(t);
+						};
+					});
+			}
 
 			this.setStyles(scope, options);
 		},

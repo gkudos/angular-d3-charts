@@ -271,8 +271,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.style('opacity', 0.8);
 				} else {
 					bars.attr('width', x0.rangeBand())
+						.attr('title', function(d) {
+							var format = d3.format('0,000');
+							return format(d[options.y.key]);
+						})
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i);
+							return scope.x(d[options.x.key]) + x0(i);
 						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
@@ -284,7 +288,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						//.style('opacity', 0)
 						.style('fill', function(d, i) {
 							var color = d3.rgb(colors(i));
-							var factor = 0.5 + d.y/max;
+							var factor = 0.5 + d[options.y.key]/max;
 							var finalColor = factor <= 1? color.brighter(1-factor):color.darker(factor);
 							// TODO Check subcolors.
 							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
@@ -293,10 +297,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.ease('cubic-in-out')
 						.duration(1000)
 						.attr('height', function(d) {
-							return Math.abs(scope.y(d.y) - scope.y(0));
+							return Math.abs(scope.y(d[options.y.key]) - scope.y(0));
 						})
 						.attrTween('transform', function(d, i, a) {
-							var h = Math.abs(scope.y(d.y) - scope.y(0));
+							var h = Math.abs(scope.y(d[options.y.key]) - scope.y(0));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
 							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
 							return function(t) {
@@ -305,6 +309,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						});
 						//.style('opacity', 1);
 				}
+				bars.select('title').remove();
+				bars.append('title')
+					.text(function(d) {
+						var format = d3.format('0,000');
+						return format(d[options.y.key]);
+					});
 			};
 
 			var barGroups = barsContainer.selectAll('.' + scope.classPrefix + '-group-bar')

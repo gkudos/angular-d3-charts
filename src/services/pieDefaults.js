@@ -5,7 +5,8 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 			radius: 0,
 			x: {
 				key: 'x',
-				label: 'x'
+				label: 'x',
+				show: true
 			},
 			y: {
 				key: 'y',

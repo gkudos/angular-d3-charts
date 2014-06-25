@@ -120,7 +120,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			g.append('text')
 	      .attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-	      .attr('dy', '-0.75em')
+	      .attr('dy', options.x.show? '-0.75em':0)
 				.attr('class', scope.classPrefix + '-arc-val')
 				.style('text-anchor', 'middle')
 	      .text(function(d) {
@@ -135,14 +135,16 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return text;
 				});
 
-			g.append('text')
-				.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-				.attr('dy', '.75em')
-				.attr('class', scope.classPrefix + '-arc-label')
-				.style('text-anchor', 'middle')
-				.text(function(d) {
-					return d.data[options.x.key];
-				});
+			if(options.x.show) {
+				g.append('text')
+					.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
+					.attr('dy', '.75em')
+					.attr('class', scope.classPrefix + '-arc-label')
+					.style('text-anchor', 'middle')
+					.text(function(d) {
+						return d.data[options.x.key];
+					});
+			}
 
 			gData.exit()
 				.datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
@@ -179,20 +181,22 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					};
 				});
 
-			gData.selectAll('.' + scope.classPrefix + '-arc-label')
-				.text(function() {
-					var d = d3.select(this.parentNode).data()[0];
-					return d.data[options.x.key];
-				})
-				.transition()
-				.duration(750)
-				.attrTween('transform', function(da, i, a) {
-					var d = d3.select(this.parentNode).data()[0];
-					var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-					return function(t) {
-						return inp(t);
-					};
-				});
+			if(options.x.show) {
+				gData.selectAll('.' + scope.classPrefix + '-arc-label')
+					.text(function() {
+						var d = d3.select(this.parentNode).data()[0];
+						return d.data[options.x.key];
+					})
+					.transition()
+					.duration(750)
+					.attrTween('transform', function(da, i, a) {
+						var d = d3.select(this.parentNode).data()[0];
+						var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
+						return function(t) {
+							return inp(t);
+						};
+					});
+			}
 
 			this.setStyles(scope, options);
 		},
