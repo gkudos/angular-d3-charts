@@ -39,7 +39,9 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			barHelpers.addOneAxis(scope, options);
 			svgHelpers.updateStyles(scope, options);
 
-			barHelpers.updateData(scope, options);
+			scope.$watch('data', function() {
+				barHelpers.updateData(scope, options);
+			});
 		}
 	};
 });

@@ -43,7 +43,6 @@ angular.module('angular-d3-charts', []).directive('a3bar', function ($log, d3Hel
 			scope.$watch('data', function() {
 				barHelpers.updateData(scope, options);
 			});
-
 		}
 	};
 });
@@ -89,7 +88,9 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			barHelpers.addOneAxis(scope, options);
 			svgHelpers.updateStyles(scope, options);
 
-			barHelpers.updateData(scope, options);
+			scope.$watch('data', function() {
+				barHelpers.updateData(scope, options);
+			});
 		}
 	};
 });
@@ -403,7 +404,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				key: 'y',
 				label: 'y',
 				ticks: 5,
-				tickSubdivide: 4
+				tickSubdivide: 4,
+				minFromZero: true
 			},
 			axis: {
 				// Possible Values ['bottom', 'top']
@@ -857,8 +859,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			$log.debug('[Angular - D3] x domain:', domain);
 
 			var totals = [];
-			var min = d3.min(data, function(d) {
-				return d3.min(d[options.y.key], function(v, i) {
+			var max = d3.max(data, function(d) {
+				return d3.max(d[options.y.key], function(v, i) {
 					if(options.y.scale === 'time' && !(v instanceof Date)) {
 						v = formatTime.parse(v);
 					}
@@ -870,12 +872,15 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					return v;
 				});
 			});
-			$log.debug('[Angular - D3] Totals:', totals);
-			$log.debug('[Angular - D3] Data min for bars:', min);
 
-			var max = d3.max(data, function(d) {
-				return d3.max(d[options.y.key]);
-			});
+			var min = 0;
+
+			if(!options.y.minFromZero) {
+				min = d3.min(data, function(d) {
+					return d3.min(d[options.y.key]);
+				});
+			}
+
 			$log.debug('[Angular - D3] Data max for bars:', max);
 
 			if(min === undefined || max === undefined || (min === 0 && max === 0)) {
@@ -890,6 +895,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(min < max) {
 				scope.y.nice();
 			}
+
 			if(scope.type === 'bar') {
 				scope.yl.call(scope.yAxis);
 				svgHelpers.addSubdivideTicks(scope.yl, scope.y, scope.yAxis, options.y);
@@ -915,7 +921,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					bars
 						.attr('transform', function(d, i) {
 							var iconHeight = 115;
-							var percentH = Math.abs((scope.y(d.y) - scope.y(0))/iconHeight);
+							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/iconHeight);
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
 							return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
 						});
@@ -938,7 +944,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.duration(1000)
 						.attrTween('transform', function(d, i, a) {
 							//var percentW = x0.rangeBand()/102;
-							var percentH = Math.abs((scope.y(d.y) - scope.y(0))/115);
+							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/115);
 							return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
 						})
 						.style('opacity', 0.8);
@@ -970,10 +976,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.ease('cubic-in-out')
 						.duration(1000)
 						.attr('height', function(d) {
-							return Math.abs(scope.y(d[options.y.key]) - scope.y(0));
+							return Math.abs(scope.y(d[options.y.key]) - scope.y(min));
 						})
 						.attrTween('transform', function(d, i, a) {
-							var h = Math.abs(scope.y(d[options.y.key]) - scope.y(0));
+							var h = Math.abs(scope.y(d[options.y.key]) - scope.y(min));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
 							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
 							return function(t) {
@@ -1013,16 +1019,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			updateBars(bars);
 
 			if(scope.type === 'oneAxisBar') {
-				var helpTextContainer = scope.svg.select('g.' + scope.classPrefix +'-helptext');
+				scope.svg.select('g.' + scope.classPrefix +'-helptext').remove();
 
-				if(helpTextContainer.empty()) {
-					helpTextContainer = scope.svg.append('g')
-						.attr('transform', 'translate(' + scope.xlLeftOffset + ',' +
-							(scope.ylTopOffset - (options.x.position === 'bottom'? options.height*0.15:-options.height*0.85)) + ')')
-						.attr('class', scope.classPrefix + '-helptext');
-				} else {
-
-				}
+				var helpTextContainer = scope.svg.append('g')
+					.attr('transform', 'translate(' + scope.xlLeftOffset + ',' +
+						(scope.ylTopOffset - (options.x.position === 'bottom'? options.height*0.15:-options.height*0.85)) + ')')
+					.attr('class', scope.classPrefix + '-helptext');
 
 				var textGroups = helpTextContainer.selectAll('.' + scope.classPrefix + '-values')
 					.data(data, _idFunction)

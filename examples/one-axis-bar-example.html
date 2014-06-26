@@ -6,43 +6,62 @@
 		<script src="../bower_components/d3/d3.min.js"></script>
 		<script src="../dist/angular-d3-charts.js"></script>
 		<script>
-				var app = angular.module("demoapp", ['angular-d3-charts']);
-				app.controller("DemoController", [ "$scope", function($scope) {
-						// Nothing here!
-						angular.extend($scope, {
-							options: {
-								barGap: 0.7,
-								axis: {
-									stroke: 'red',
-									color: '#4872A8',
-									fontWeight: 'bold',
-									valuesColor: '#959595',
-									percentColor: '#BF3F3E',
-								},
-								x: {
-									//tickSize: 0,
-									position: 'bottom',
-									label: 'Store'
-								}
-							},
-							values: [{
-							  id: 1,
-							  x: 'Ene',
-							  y: [ 54 ]
-						  }, {
-							  id: 2,
-							  x: 'Feb',
-							  y: [ 12 ]
-						  }, {
-							  id: 3,
-							  x: 'Mar',
-							  y: [ 152 ]
-						  }]
-						});
-				}]);
+			var app = angular.module("demoapp", ['angular-d3-charts']);
+			var oldValues = [{
+				id: 1,
+				x: 'Ene',
+				y: [ 343 ]
+			}, {
+				id: 2,
+				x: 'Feb',
+				y: [ 254 ]
+			}, {
+				id: 3,
+				x: 'Mar',
+				y: [ 53 ]
+			}];
+			app.controller("DemoController", [ "$scope", function($scope) {
+				// Nothing here!
+				angular.extend($scope, {
+					options: {
+						barGap: 0.7,
+						axis: {
+							stroke: 'red',
+							color: '#4872A8',
+							fontWeight: 'bold',
+							valuesColor: '#959595',
+							percentColor: '#BF3F3E',
+						},
+						x: {
+							//tickSize: 0,
+							position: 'bottom',
+							label: 'Store'
+						}
+					},
+					values: [{
+						id: 1,
+						x: 'Ene',
+						y: [ 54 ]
+					}, {
+						id: 2,
+						x: 'Feb',
+						y: [ 12 ]
+					}, {
+						id: 3,
+						x: 'Mar',
+						y: [ 152 ]
+					}],
+					changeValues: function() {
+						var aux = $scope.values;
+						$scope.values = oldValues;
+						oldValues = aux;
+					}
+				});
+			}]);
 		</script>
 	</head>
 	<body ng-controller="DemoController">
 		<a3oabar width="300px" height="300px" options="options" data="values"></a3oabar>
+		<button ng-click="changeValues()">Change Values</button>
 	</body>
 </html>

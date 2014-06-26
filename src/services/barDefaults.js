@@ -30,7 +30,8 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				key: 'y',
 				label: 'y',
 				ticks: 5,
-				tickSubdivide: 4
+				tickSubdivide: 4,
+				minFromZero: true
 			},
 			axis: {
 				// Possible Values ['bottom', 'top']
