@@ -1,18 +1,18 @@
 {
   "name": "angular-d3-charts",
-  "version": "0.1.0",
-  "homepage": "https://github.com/elesdoar/angular-d3-charts",
+  "version": "0.1.3",
+  "homepage": "https://gkudos.github.io/angular-d3-charts",
   "authors": [
     "Michael Salgado <elesdoar@gmail.com>"
   ],
   "description": "Angular directives with D3 charts.",
-  "main": "angular-d3-charts.js",
+  "main": "dist/angular-d3-charts.min.js",
   "dependencies": {
     "jquery": "2.1.x",
     "angular": "1.3.x",
     "d3": "3.4.x"
   },
-  "devDependencies": {    
+  "devDependencies": {
     "bootstrap": "3.1.x",
     "angular-mocks": "1.3.x"
   },
