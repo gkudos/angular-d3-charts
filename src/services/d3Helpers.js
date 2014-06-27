@@ -49,7 +49,11 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 				fontWeight: 'normal'
 			},
 			showDefaultData: true,
-			locale: null
+			locale: null,
+			animations: {
+				time: 750,
+				ease: 'cubic-in-out'
+			}
 		};
 	}
 
@@ -130,6 +134,10 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 
 				if(this.isDefined(userDefaults.axis)) {
 					angular.extend(newDefaults.axis, userDefaults.axis);
+				}
+
+				if(this.isDefined(userDefaults.animations)) {
+					angular.extend(newDefaults.animations, userDefaults.animations);
 				}
 			}
 		},

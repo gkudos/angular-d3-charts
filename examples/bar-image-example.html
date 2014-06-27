@@ -7,6 +7,31 @@
     <script src="../dist/angular-d3-charts.js"></script>
     <script>
         var app = angular.module("demoapp", ['angular-d3-charts']);
+        var oldValues = [{
+          id: 1,
+          x: 'Ene',
+          y: [ 32 ]
+        }, {
+          id: 2,
+          x: 'Feb',
+          y: [ 63 ]
+        }, {
+          id: 3,
+          x: 'Mar',
+          y: [ 136 ]
+        }, {
+          id: 4,
+          x: 'Abr',
+          y: [ 25 ]
+        }, {
+          id: 5,
+          x: 'May',
+          y: [ 98 ]
+        }, {
+          id: 6,
+          x: 'Jun',
+          y: [ 324 ]
+        }];
         app.controller("DemoController", [ "$scope", "iconHelpers", function($scope, iconHelpers) {
             angular.extend($scope, {
               options: {
@@ -60,12 +85,19 @@
       				  id: 7,
       				  x: 'Jul',
       				  y: [ 200 ]
-      			  }]
+      			  }],
+
+              changeValues: function() {
+                var aux = $scope.values;
+                $scope.values = oldValues;
+                oldValues = aux;
+              }
             });
         }]);
     </script>
   </head>
   <body ng-controller="DemoController">
     <a3bar width="600px" height="100px" options="options" data="values"></a3bar>
+    <button ng-click="changeValues()">Change Values</button>
   </body>
 </html>

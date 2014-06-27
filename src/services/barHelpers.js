@@ -241,20 +241,34 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					.attr('clip-path', 'url(#'+scope.idClip+')');
 			}
 
-			var updateBars = function(bars) {
+			var updateBars = function(bars, update) {
 				if(d3Helpers.isDefined(options.bar.path)) {
 					bars
-						.attr('transform', function(d, i) {
+						.transition()
+						.duration(options.animations.time)
+						.attrTween('transform', function(d, i, a) {
 							var iconHeight = 115;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/iconHeight);
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
-							return 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
+							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
+							var inp = d3.interpolateTransform(a, trans);
+							return function(t) {
+								return inp(t);
+							};
 						});
-					bars.append('path')
-						.attr('class', 'a3bar-bar-path')
-						.attr('d', options.bar.path)
-						.attr('fill-rule', 'evenodd')
-						.attr('transform', 'scale(0)')
+
+					if(update) {
+						bars = bars.selectAll('path');
+					} else {
+						bars = bars.append('path')
+							.attr('d', options.bar.path)
+							.attr('class', 'a3bar-bar-path')
+							.attr('fill-rule', 'evenodd')
+							.attr('transform', 'scale(0)')
+							.style('opacity', 0);
+					}
+
+					bars
 						.style('fill', function(d, i) {
 							var color = d3.rgb(colors(i));
 							return color;
@@ -263,11 +277,11 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							return d3.rgb(colors(i)).darker();
 						})
 						.style('stroke-width', 1)
-						.style('opacity', 0)
 						.transition()
-						.ease('sin-in-out')
-						.duration(1000)
+						.ease(options.animations.ease)
+						.duration(options.animations.time)
 						.attrTween('transform', function(d, i, a) {
+							d = d3.select(this.parentNode).data()[0];
 							//var percentW = x0.rangeBand()/102;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/115);
 							return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
@@ -298,8 +312,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
 						})
 						.transition()
-						.ease('cubic-in-out')
-						.duration(1000)
+						.ease(options.animations.ease)
+						.duration(options.animations.time)
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d[options.y.key]) - scope.y(min));
 						})
@@ -328,8 +342,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			barGroups.exit().remove();
 
 			var bars = barGroups.selectAll('.' + scope.classPrefix + '-bar').data(mapFunction);
+			bars.interrupt();
+			updateBars(bars, true);
 			bars.exit().remove();
-			updateBars(bars);
 
 			var series = barGroups.enter()
 				.append('g')

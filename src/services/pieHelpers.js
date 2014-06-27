@@ -153,8 +153,8 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			gData.selectAll('path')
 				.interrupt()
 				.transition()
-				.duration(750)
-				.ease('cubic-in-out')
+				.duration(options.animations.time)
+				.ease(options.animations.ease)
 				.attrTween('d', arcTween)
 				.style('opacity', 1);
 
