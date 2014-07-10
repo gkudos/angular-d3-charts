@@ -26,7 +26,6 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			scope.svg.attr('transform', 'translate(' + options.width / 2 + ',' + options.height / 2 + ')');
 
 			element.width(options.containerWidth);
-			element.height(options.containerHeight);
 
 			pieHelpers.addArc(scope, options);
 			//svgHelpers.updateStyles(scope, options);

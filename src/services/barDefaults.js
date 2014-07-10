@@ -7,7 +7,9 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				gap: 0.2,
 				path: null,
 				colors: d3.scale.category20(),
-				subcolors: null
+				subcolors: null,
+				// Possible Values [d3.interpolateRgb, d3.interpolateHsl, d3.interpolateLab, d3.interpolateHcl]
+				colorInterpolator: null
 			},
 			x: {
 				tickFormat: null,

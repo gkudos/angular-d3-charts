@@ -6,10 +6,10 @@ module.exports = function(grunt) {
     // Metadata.
     pkg: grunt.file.readJSON('package.json'),
     banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
-      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-      ' Licensed <%= pkg.license %> */\n',
+    '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+    '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
+    '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+    ' Licensed <%= pkg.license %> */\n',
     // Task configuration.
     shell: {
       options: {
@@ -41,17 +41,17 @@ module.exports = function(grunt) {
       dist: {
         src: [
           'src/directives/bar.js',
-					'src/directives/oneAxisBar.js',
-					'src/directives/pie.js',
-					'src/directives/line.js',
+          'src/directives/oneAxisBar.js',
+          'src/directives/pie.js',
+          'src/directives/line.js',
           'src/services/d3Helpers.js',
           'src/services/iconHelpers.js',
           'src/services/barDefaults.js',
-					'src/services/pieDefaults.js',
-					'src/services/lineDefaults.js',
+          'src/services/pieDefaults.js',
+          'src/services/lineDefaults.js',
           'src/services/barHelpers.js',
-					'src/services/pieHelpers.js',
-					'src/services/lineHelpers.js',
+          'src/services/pieHelpers.js',
+          'src/services/lineHelpers.js',
           'src/services/svgHelpers.js'
         ],
         dest: 'dist/<%= pkg.name %>.js'
@@ -102,7 +102,7 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         banner: '<%= banner %>',
-				report: 'gzip'
+        report: 'gzip'
       },
       dist: {
         src: '<%= concat.dist.dest %>',
@@ -139,36 +139,36 @@ module.exports = function(grunt) {
       tests: {
         src: ['test/unit/*.js', 'test/e2e/*.js'],
 
-				options: {
-					globals: {
-						angular: false,
-						d3: false,
+        options: {
+          globals: {
+            angular: false,
+            d3: false,
 
-						// Jasmine
-						jasmine : false,
-						isCommonJS : false,
-						exports : false,
-						spyOn : false,
-						it : false,
-						xit : false,
-						expect : false,
-						runs : false,
-						waits : false,
-						waitsFor : false,
-						beforeEach : false,
-						afterEach : false,
-						describe : false,
-						xdescribe : false,
+            // Jasmine
+            jasmine : false,
+            isCommonJS : false,
+            exports : false,
+            spyOn : false,
+            it : false,
+            xit : false,
+            expect : false,
+            runs : false,
+            waits : false,
+            waitsFor : false,
+            beforeEach : false,
+            afterEach : false,
+            describe : false,
+            xdescribe : false,
             protractor: false,
             browser: false,
             element: false,
             by: false,
 
-						// Angular mocks
-						module: false,
-						inject: false
-					}
-				}
+            // Angular mocks
+            module: false,
+            inject: false
+          }
+        }
       },
       gruntfile: {
         src: 'Gruntfile.js',
@@ -181,13 +181,13 @@ module.exports = function(grunt) {
         }
       }
     },
-		karma: {
+    karma: {
       unit: {
         configFile: 'test/karma.conf.js',
         autoWatch: false,
         singleRun: true
       }
-		},
+    },
     protractor: {
       options: {
         keepAlive: false,
@@ -206,7 +206,7 @@ module.exports = function(grunt) {
         files: ['src/**/*.js', 'test/unit/**.js', 'test/e2e/**.js'],
         tasks: [
           'jshint:source',
-					'jshint:tests',
+          'jshint:tests',
           'concat:dist',
           'uglify',
           'test:unit',
@@ -222,15 +222,15 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', ['watch:source']);
-	grunt.registerTask('test', ['jshint','test:unit', 'test:e2e']);
+  grunt.registerTask('test', ['jshint','test:unit', 'test:e2e']);
   grunt.registerTask('test:unit', ['karma:unit']);
-	grunt.registerTask('test:e2e', ['shell:protractor_update', 'connect:testserver', 'protractor:run']);
+  grunt.registerTask('test:e2e', ['shell:protractor_update', 'connect:testserver', 'protractor:run']);
   grunt.registerTask('test:e2e-firefox', ['shell:protractor_update', 'connect:testserver', 'protractor:firefox']);
 
   //development
   grunt.registerTask('dev', ['connect:devserver', 'open:devserver', 'watch:source']);
-	grunt.registerTask('build', ['jshint:source', 'concat:dist', 'uglify']);
-	grunt.registerTask('travis', ['build', 'test:unit']);
+  grunt.registerTask('build', ['jshint:source', 'concat:dist', 'uglify']);
+  grunt.registerTask('travis', ['build', 'test:unit']);
 
   //installation-related
   grunt.registerTask('install', ['shell:npm_install', 'bower:install', 'shell:protractor_update']);

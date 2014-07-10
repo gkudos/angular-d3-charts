@@ -2,6 +2,9 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 	function _getDefaults() {
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
+			pie: {
+				colors: d3.scale.category20()
+			},
 			radius: 0,
 			x: {
 				key: 'x',
@@ -63,6 +66,10 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 				newDefaults.showPercent = d3Helpers.isDefined(userDefaults.showPercent)?  userDefaults.showPercent:newDefaults.showPercent;
 				newDefaults.borderColor = d3Helpers.isDefined(userDefaults.borderColor)?  userDefaults.borderColor:newDefaults.borderColor;
 				newDefaults.pieAnimation = d3Helpers.isDefined(userDefaults.pieAnimation)?  userDefaults.pieAnimation:newDefaults.pieAnimation;
+
+				if(isDefined(userDefaults.pie)) {
+					angular.extend(newDefaults.pie, userDefaults.pie);
+				}
 
 				if(isDefined(userDefaults.x)) {
 					angular.extend(newDefaults.x, userDefaults.x);

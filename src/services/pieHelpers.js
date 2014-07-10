@@ -77,7 +77,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 		updateData: function(scope, options) {
 			$log.debug('Update data');
-			var colors = d3.scale.category20();
+			var colors = d3Helpers.setColors(options.pie.colors);
 			var data = d3Helpers.getDataFromScope(scope, options);
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for pie');
@@ -96,7 +96,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
       data1 = scope.pie(data);
 
 			var key = function(d) {
-				return d.data.id;
+				return d.data[options.idKey];
 			};
 
 			var arcTween = function() {
@@ -175,10 +175,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.duration(750)
 				.attrTween('transform', function(da, i, a) {
 					var d = d3.select(this.parentNode).data()[0];
-					var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-					return function(t) {
-						return inp(t);
-					};
+					return d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
 				});
 
 			if(options.x.show) {
@@ -191,10 +188,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.duration(750)
 					.attrTween('transform', function(da, i, a) {
 						var d = d3.select(this.parentNode).data()[0];
-						var inp = d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-						return function(t) {
-							return inp(t);
-						};
+						return d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
 					});
 			}
 

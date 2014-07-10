@@ -22,6 +22,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 
 	function _getCommonDefaults() {
 		return {
+			idKey: 'id',
 			width: 300,
 			heigth: 250,
 			zoom: true,
@@ -116,6 +117,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 
 		setDefaults: function(newDefaults, userDefaults) {
 			if (this.isDefined(userDefaults)) {
+				newDefaults.idKey = this.isDefined(userDefaults.idKey) ?  userDefaults.idKey : newDefaults.idKey;
 				newDefaults.width = this.isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
 				newDefaults.heigth = this.isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
 				newDefaults.zoom = this.isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;
@@ -161,6 +163,16 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 
 			options.width = element.width();
 			options.height = element.height();
+		},
+
+		setColors: function(userColors, defaultColors) {
+			var colors = defaultColors || d3.scale.category20();
+			if(this.isDefined(userColors)) {
+				colors = this.isArray(userColors)? d3.scale.ordinal().range(userColors):colors;
+				colors = this.isString(userColors)? d3.scale.ordinal().range([userColors]):colors;
+				colors = this.isFunction(userColors)? userColors:colors;
+			}
+			return colors;
 		},
 
 		getDataFromScope: function(scope, options) {

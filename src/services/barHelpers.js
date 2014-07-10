@@ -1,7 +1,4 @@
 angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Helpers, svgHelpers) {
-	var _idFunction = function(d) {
-		return d.id;
-	};
 	/*
 	var wrap = function (text, width) {
 		text.each(function() {
@@ -179,6 +176,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				return;
 			}
 			var data = d3Helpers.getDataFromScope(scope, options);
+			var _idFunction = function(d) {
+				return d[options.idKey];
+			};
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for bars');
 				return;
@@ -186,17 +186,12 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			$log.debug('[Angular - D3] Data for bars:', data);
 
 			var formatTime = d3.time.format(options.timeFormat);
-			var colors = d3.scale.category20();
-			if(d3Helpers.isDefined(options.bar.colors)) {
-				colors = d3Helpers.isArray(options.bar.colors)? d3.scale.ordinal().range(options.bar.colors):colors;
-				colors = d3Helpers.isString(options.bar.colors)? d3.scale.ordinal().range([options.bar.colors]):colors;
-				colors = d3Helpers.isFunction(options.bar.colors)? options.bar.colors:colors;
-			}
+			var colors = d3Helpers.setColors(options.bar.colors);
 
 			var mapFunction = function(d) {
 				return d[options.y.key].map(function(e) {
 					return {
-						parentId: d.id,
+						parentId: d[options.idKey],
 						x: d[options.x.key],
 						y: e
 					};
@@ -316,10 +311,10 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					bars.attr('width', x0.rangeBand())
 						.attr('title', function(d) {
 							var format = d3.format('0,000');
-							return format(d[options.y.key]);
+							return format(d.y);
 						})
 						.attr('x', function(d, i) {
-							return scope.x(d[options.x.key]) + x0(i);
+							return scope.x(d.x) + x0(i);
 						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
@@ -329,26 +324,35 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							return 'translate(0, ' + (options.y.direction === 'btt'? scope.y.range()[1]:0) + ')';
 						})
 						//.style('opacity', 0)
-						.style('fill', function(d, i) {
-							var color = d3.rgb(colors(i));
-							var factor = 0.5 + d[options.y.key]/max;
-							var finalColor = factor <= 1? color.brighter(1-factor):color.darker(factor);
-							// TODO Check subcolors.
-							return d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:finalColor;
+						.style('fill', function() {
+							var fill = d3.select(this).style('fill');
+							return fill === 'rgb(0, 0, 0)'?
+								d3.rgb(255,255,255):fill;
 						})
 						.transition()
 						.ease(options.animations.ease)
 						.duration(options.animations.time)
 						.attr('height', function(d) {
-							return Math.abs(scope.y(d[options.y.key]) - scope.y(min));
+							return Math.abs(scope.y(d.y) - scope.y(min));
 						})
 						.attrTween('transform', function(d, i, a) {
-							var h = Math.abs(scope.y(d[options.y.key]) - scope.y(min));
+							var h = Math.abs(scope.y(d.y) - scope.y(min));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
 							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
-							return function(t) {
-								return inp(t);
-							};
+							return inp;
+						})
+						.styleTween('fill', function(d, i, a) {
+							var color = d3.rgb(colors(i));
+							var inp;
+							if(d3Helpers.isDefined(options.bar.colorInterpolator) && d3Helpers.isFunction(options.bar.colorInterpolator)) {
+								inp = options.bar.colorInterpolator(color.brighter(), color.darker());
+								color = inp(d.y/max);
+							}
+
+							// TODO Check subcolors.
+							var returnColor = d3Helpers.isDefined(options.bar.subcolors)? options.bar.subcolors[d.parentId-1]:color;
+							inp = d3.interpolateRgb(a, returnColor);
+							return inp;
 						});
 						//.style('opacity', 1);
 				}
@@ -356,7 +360,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				bars.append('title')
 					.text(function(d) {
 						var format = d3.format('.3g');
-						return format(d[options.y.key]);
+						return format(d.y);
 					});
 			};
 
