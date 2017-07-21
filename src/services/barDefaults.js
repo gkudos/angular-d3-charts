@@ -6,7 +6,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scale.category20(),
+				colors: d3.scaleOrdinal(d3.schemeCategory20),
 				subcolors: null,
 				// Possible Values [d3.interpolateRgb, d3.interpolateHsl, d3.interpolateLab, d3.interpolateHcl]
 				colorInterpolator: null
@@ -14,7 +14,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			x: {
 				tickFormat: null,
 				tickSize: 6,
-				orient: 'bottom',
+				orient: 'axisBottom',
 				position: 'bottom',
 				key: 'x',
 				label: 'x',
@@ -25,7 +25,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				scale: 'linear',
 				tickFormat: null,
 				tickSize: 6,
-				orient: 'left',
+				orient: 'axisLeft',
 				position: 'left',
 				// Possible Values ['ttb', 'btt'] => ['top to bottom', 'bottom to top']
 				direction: 'ttb',

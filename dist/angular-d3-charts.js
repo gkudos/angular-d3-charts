@@ -73,7 +73,7 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			d3Helpers.setSize(element, options, attrs);
 
 			// Orient option disabled for this chart.
-			options.x.orient = 'bottom';
+			options.x.orient = 'axisBottom';
 
 			barHelpers.setXScale(scope, options);
 			barHelpers.setYScale(scope, options);
@@ -224,7 +224,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			locale: null,
 			animations: {
 				time: 750,
-				ease: 'cubic-in-out'
+				ease: d3.easeCubic
 			}
 		};
 	}
@@ -337,7 +337,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		},
 
 		setColors: function(userColors, defaultColors) {
-			var colors = defaultColors || d3.scale.category20();
+			var colors = defaultColors || d3.scaleOrdinal(d3.schemeCategory20);
 			if(this.isDefined(userColors)) {
 				colors = this.isArray(userColors)? d3.scale.ordinal().range(userColors):colors;
 				colors = this.isString(userColors)? d3.scale.ordinal().range([userColors]):colors;
@@ -399,7 +399,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scale.category20(),
+				colors: d3.scaleOrdinal(d3.schemeCategory20),
 				subcolors: null,
 				// Possible Values [d3.interpolateRgb, d3.interpolateHsl, d3.interpolateLab, d3.interpolateHcl]
 				colorInterpolator: null
@@ -407,7 +407,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			x: {
 				tickFormat: null,
 				tickSize: 6,
-				orient: 'bottom',
+				orient: 'axisBottom',
 				position: 'bottom',
 				key: 'x',
 				label: 'x',
@@ -418,7 +418,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 				scale: 'linear',
 				tickFormat: null,
 				tickSize: 6,
-				orient: 'left',
+				orient: 'axisLeft',
 				position: 'left',
 				// Possible Values ['ttb', 'btt'] => ['top to bottom', 'bottom to top']
 				direction: 'ttb',
@@ -514,7 +514,7 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
 			pie: {
-				colors: d3.scale.category20()
+				colors: d3.scaleOrdinal(d3.schemeCategory20)
 			},
 			radius: 0,
 			x: {
@@ -756,16 +756,17 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		},
 
 		setXScale: function(scope, options) {
-			scope.x = d3.scale.ordinal();
-			//scope.x.range([0, options.width]);
+			scope.x = d3.scaleBand();
+			scope.x
+				.range([0, options.width]);
 
 			if(!d3Helpers.isDefined(scope.xAxis)) {
 				if(!d3Helpers.isDefined(options.x.orient) || !d3Helpers.isString(options.x.orient) ||
-					(options.x.orient !== 'bottom' && options.x.orient !== 'top')) {
-					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "bottom"');
-					options.x.orient = 'bottom';
+					(options.x.orient !== 'axisBottom' && options.x.orient !== 'axisTop')) {
+					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "axisBottom"');
+					options.x.orient = 'axisBottom';
 				}
-				scope.xAxis = d3.svg.axis().scale(scope.x).orient(options.x.orient);
+				scope.xAxis = d3[options.x.orient](scope.x);
 			} else {
 				scope.xAxis.scale(scope.x);
 			}
@@ -779,7 +780,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			var data  = d3Helpers.getDataFromScope(scope, options);
-			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], options.bar.gap);
+			scope.x
+				.domain(data.map(function(d) { return d[options.x.key]; }))
+				.rangeRound([0, options.width], options.bar.gap);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.data)) {
 				this.updateData(scope.data, options);
@@ -789,20 +792,20 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		setYScale: function(scope, options) {
 			switch(options.y.scale) {
 				case 'log':
-					scope.y = d3.scale.log().clamp(true);
+					scope.y = d3.scaleLog().clamp(true);
 					break;
 				case 'sqrt':
-					scope.y = d3.scale.sqrt();
+					scope.y = d3.scaleSqrt();
 					break;
 				case 'time':
-					scope.y = d3.time.scale();
+					scope.y = d3.scaleTime();
 					break;
 				default:
 					if(options.y.scale !== 'linear') {
 						$log.warn('[Angular - D3] Ticksize must be a string and ["linear", "log", "time", "sqrt"]. Setting default value "linear"');
 						options.y.scale = 'linear';
 					}
-					scope.y = d3.scale.linear();
+					scope.y = d3.scaleLinear();
 					break;
 			}
 
@@ -818,9 +821,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(scope.yAxis)) {
 				if(!d3Helpers.isDefined(options.y.orient) || !d3Helpers.isString(options.y.orient)) {
 					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "left"');
-					options.y.orient = 'left';
+					options.y.orient = 'axisLeft';
 				}
-				scope.yAxis = d3.svg.axis().scale(scope.y).orient(options.y.orient);
+				scope.yAxis = d3[options.y.orient](scope.y);
 			} else {
 				scope.yAxis.scale(scope.y);
 			}
@@ -846,7 +849,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					break;
 				case 'time':
 					if(!d3Helpers.isDefined(options.y.tickFormat)) {
-						var locale = d3Helpers.isDefined(options.locale)? options.locale.timeFormat:d3.time.format;
+						var locale = d3Helpers.isDefined(options.locale)? options.locale.timeFormat:d3.timeFormat;
 						options.y.tickFormat = locale.multi([
 							['.%L', function(d) { return d.getMilliseconds(); }],
 							[':%S', function(d) { return d.getSeconds(); }],
@@ -888,7 +891,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 			$log.debug('[Angular - D3] Data for bars:', data);
 
-			var formatTime = d3.time.format(options.timeFormat);
+			var formatTime = d3.timeFormat(options.timeFormat);
 			var colors = d3Helpers.setColors(options.bar.colors);
 
 			var mapFunction = function(d) {
@@ -950,11 +953,13 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			if(d3Helpers.isDefined(scope.zoom) && d3Helpers.isDefined(options.zoom) && options.zoom) {
-				scope.zoom.x(scope.x).y(scope.y);
+				// scope.zoom.x(scope.x).y(scope.y);
 			}
 
 			var yMaxPoints = d3.max(data.map(function(d){ return d[options.y.key].length; }));
-			var x0 = d3.scale.ordinal().domain(d3.range(yMaxPoints)).rangeRoundBands([0, scope.x.rangeBand()]);
+			var x0 = d3.scaleBand()
+				.domain(d3.range(yMaxPoints))
+				.rangeRound([0, scope.x.bandwidth()]);
 
 			var barsContainer = scope.svg.select('g.' + scope.classPrefix + '-bars');
 			if(barsContainer.empty()) {
@@ -973,8 +978,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							var iconHeight = 115;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/iconHeight);
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
-							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
-							var inp = d3.interpolateTransform(a, trans);
+							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.bandwidth()/2) + ', ' + dy + ')';
+							var inp = d3.interpolateString(a, trans);
 							return function(t) {
 								return inp(t);
 							};
@@ -1005,15 +1010,16 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.duration(options.animations.time)
 						.attrTween('transform', function(d, i, a) {
 							d = d3.select(this.parentNode).data()[0];
-							//var percentW = x0.rangeBand()/102;
+							var percentW = x0.bandwidth()/102;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/115);
-							return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
+							return d3.interpolateString(a, 'scale(' + percentW + ', ' + percentH + ')');
 						})
 						.style('opacity', 0.8);
 				} else {
-					bars.attr('width', x0.rangeBand())
+					bars
+						.attr('width', x0.bandwidth())
 						.attr('title', function(d) {
-							var format = d3.format('0,000');
+							var format = d3.format('.3');
 							return format(d.y);
 						})
 						.attr('x', function(d, i) {
@@ -1038,12 +1044,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d.y) - scope.y(min));
 						})
+						/*
 						.attrTween('transform', function(d, i, a) {
 							var h = Math.abs(scope.y(d.y) - scope.y(min));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
-							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
+							var inp = d3.interpolateTransformSvg(a, 'translate(0, ' + dy + ')');
 							return inp;
 						})
+						*/
 						.styleTween('fill', function(d, i, a) {
 							var color = d3.rgb(colors(i));
 							var inp;
@@ -1113,7 +1121,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.enter()
 						.append('text')
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+							return scope.x(d.x) + x0(i) + x0.bandwidth()/2;
 						})
 						.attr('dy', !options.axis.showPercent? '0.5em':0)
 						.attr('class', scope.classPrefix + '-val')
@@ -1132,7 +1140,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.enter()
 						.append('text')
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+							return scope.x(d.x) + x0(i) + x0.bandwidth()/2;
 						})
 						.attr('y', options.height*0.065)
 						.attr('dy', !options.axis.showValues? '-0.5em':0)
@@ -1154,6 +1162,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 });
 
 angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Helpers/*, svgHelpers*/) {
+
 	function _tweenPie($this, scope, options, b) {
 		b.innerRadius = 0;
 		var start = null;
@@ -1168,28 +1177,21 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				start = {startAngle: 0, endAngle: 2*Math.PI};
 				break;
 			default:
-				if(!d3Helpers.isDefined(options.pieAnimation) || options.pieAnimation !== '') {
+				if(!d3Helpers.isDefined(options.pieAnimation) || options.pieAnimation === '') {
 					$log.warn('[Angular - D3] The option "pieAnimation" is undefined or it has a invalid value. Setting to "normal"');
 					options.pieAnimation = 'normal';
 				}
 				start = {startAngle: 0, endAngle: 0};
 				break;
 		}
-		if($this.parentNode._current) {
-			start = $this.parentNode._current;
+		if($this._current) {
+			start = $this._current;
 		}
 		var i = d3.interpolate(start, b);
-		$this.parentNode._current = i(0);
+		$this._current = i(0);
 		return function(t) {
 			return scope.arc(i(t));
 		};
-	}
-
-	function findNeighborArc(i, data0, data1, key) {
-		var d;
-		return (d = findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
-	      : (d = findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
-	      : null;
 	}
 
 	// Find the element in data0 that joins the highest preceding element in data1.
@@ -1218,20 +1220,72 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 		}
 	}
 
+	function findNeighborArc(i, data0, data1, key) {
+		var d;
+		return (d = findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
+	      : (d = findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
+	      : null;
+	}
+
+	// calculates the angle for the middle of a slice
+	var midAngle = function(d) {
+		return d.startAngle + (d.endAngle - d.startAngle) / 2;
+	};
+
+	// function to create the HTML string for the tool tip. Loops through each key in data object
+	// and returns the html string key: value
+	var toolTipHTML = function(data) {
+		var tip = '', i   = 0;
+
+		for(var key in data.data) {
+			// if value is a number, format it as a percentage
+			var value = data.data[key];
+
+			// leave off 'dy' attr for first tspan so the 'dy' attr on text element works. The 'dy' attr on
+			// tspan effectively imitates a line break.
+			if (i === 0) {
+				tip += '<tspan x="0">' + key + ': ' + value + '</tspan>';
+			} else {
+				tip += '<tspan x="0" dy="1.2em">' + key + ': ' + value + '</tspan>';
+			}
+			i++;
+		}
+
+		return tip;
+	};
+
 	return {
 		addArc: function(scope, options) {
-			scope.arc = d3.svg.arc()
-		    .outerRadius(options.width/2 - options.margin.left)
-		    .innerRadius(options.radius);
+			var w = options.width - options.margin.left - options.margin.right;
+			var h = options.height - options.margin.top - options.margin.bottom;
+			options.radius = Math.min(w, h) / 2;
+			scope.arc = d3.arc()
+		    .outerRadius(options.radius);
 
-			scope.pie = d3.layout.pie()
-		    .sort(null)
-		    .value(function(d) { return d[options.y.key]; });
+			if(angular.isUndefined(options.innerRadius)) {
+				options.innerRadius = options.radius * 0.8;
+			}
+			scope.arc.innerRadius(options.innerRadius);
 
+			scope.outerArc = d3.arc()
+        .outerRadius(options.radius)
+        .innerRadius(options.radius);
+
+			scope.pie = d3.pie()
+				.value(function(d) { return d[options.y.key]; })
+		    .sort(null);
+
+			// ===========================================================================================
+	    // g elements to keep elements within svg modular
+			scope.svg.append('g').attr('class', scope.classPrefix + '-slices');
+			scope.svg.append('g').attr('class', scope.classPrefix + '-labelName');
+	    scope.svg.append('g').attr('class', scope.classPrefix + '-lines');
+	    // ===========================================================================================
 		},
 
 		updateData: function(scope, options) {
 			$log.debug('Update data');
+			var percentFormat = d3.format(',.2%');
 			var colors = d3Helpers.setColors(options.pie.colors);
 			var data = d3Helpers.getDataFromScope(scope, options);
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
@@ -1243,8 +1297,188 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				return d[options.y.key];
 			});
 
+			// function that creates and adds the tool tip to a selected element
+			var toolTip = function(selection) {
+				// add tooltip (svg circle element) when mouse enters label or slice
+				selection.on('mouseenter', function(data) {
+					scope.svg.append('text')
+						.attr('class', 'toolCircle')
+						.attr('dy', -15) // hard-coded. can adjust this to adjust text vertical alignment in tooltip
+						.html(toolTipHTML(data)) // add text to the circle.
+						.style('font-size', '.9em')
+						.style('text-anchor', 'middle'); // centres text in tooltip
+
+					scope.svg.append('circle')
+						.attr('class', 'toolCircle')
+						.attr('r', options.innerRadius - 5) // radius of tooltip circle
+						.style('fill', colors(data.data[options.x.key])) // colour based on category mouse is over
+						.style('fill-opacity', 0.40);
+
+				});
+
+				// remove the tooltip when mouse leaves the slice/label
+				selection.on('mouseout', function () {
+					d3.selectAll('.toolCircle').remove();
+				});
+			};
+
+			// Key function for get data.
+			var key = function(d) {
+				if(angular.isUndefined(d)) {
+					return d;
+				}
+				if(angular.isUndefined(d.data)) {
+					return d.data;
+				}
+				return d.data[options.idKey];
+			};
+
+			var arcTween = function() {
+				return _tweenPie(this, scope, options, d3.select(this).data()[0]);
+			};
+
 			//scope.svg.selectAll('.' + scope.classPrefix + '-arc').remove();
 
+			// ===========================================================================================
+			// add and colour the donut slices
+			scope.slices = scope.svg.selectAll('.' + scope.classPrefix + '-slices');
+			var dataSlices = scope.slices.selectAll('path').data();
+			var pieData = scope.pie(data);
+
+			var arcs = scope.slices
+				.selectAll('path')
+				.data(pieData, key);
+
+			arcs.enter()
+				.append('path')
+				.attr('fill', function(d) {
+					return colors(d.data[options.x.key]);
+				})
+				.attr('d', scope.arc);
+
+			arcs
+				.exit()
+				.datum(function(d, i) {
+					$log.debug('This', this);
+					return findNeighborArc(i, pieData, dataSlices, key) || d;
+				})
+				.interrupt()
+				.transition()
+				.duration(options.animations.time)
+				.ease(options.animations.ease)
+				.remove();
+
+			scope.slices.selectAll('path')
+				.interrupt()
+				.transition()
+				.duration(options.animations.time)
+				.ease(options.animations.ease)
+				.attrTween('d', arcTween)
+				.style('opacity', 1);
+			// ===========================================================================================
+
+			// ===========================================================================================
+			// add text labels
+			scope.labels = scope.svg.selectAll('.' + scope.classPrefix + '-labelName');
+
+			var labels = scope.labels
+				.selectAll('text')
+				.data(pieData, key);
+
+			labels
+				.enter()
+				.append('text')
+				.attr('dy', '.35em')
+				.html(function(d) {
+					// add "key: value" for given category. Number inside tspan is bolded in stylesheet.
+					return d.data[options.x.key] + ': <tspan>' + percentFormat(d.data[options.y.key]/total) + '</tspan>';
+				})
+				.attr('transform', function(d) {
+					// effectively computes the centre of the slice.
+					// see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+					var pos = scope.outerArc.centroid(d);
+
+					// changes the point to be on left or right depending on where label is.
+					pos[0] = options.radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+					return 'translate(' + pos + ')';
+				})
+				.style('text-anchor', function(d) {
+					// if slice centre is on the left, anchor text to start, otherwise anchor to end
+					return (midAngle(d)) < Math.PI ? 'start' : 'end';
+				});
+
+			labels.exit().remove();
+
+			scope.labels.selectAll('text')
+				.attr('dy', '.35em')
+				.html(function(d) {
+					// add "key: value" for given category. Number inside tspan is bolded in stylesheet.
+					return d.data[options.x.key] + ': <tspan>' + percentFormat(d.data[options.y.key]/total) + '</tspan>';
+				})
+				.interrupt()
+				.transition()
+				.duration(options.animations.time)
+				.ease(options.animations.ease)
+				.attr('transform', function(d) {
+					// effectively computes the centre of the slice.
+					// see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+					var pos = scope.outerArc.centroid(d);
+
+					// changes the point to be on left or right depending on where label is.
+					pos[0] = options.radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+					return 'translate(' + pos + ')';
+				})
+				.style('text-anchor', function(d) {
+					// if slice centre is on the left, anchor text to start, otherwise anchor to end
+					return (midAngle(d)) < Math.PI ? 'start' : 'end';
+				});
+			// ===========================================================================================
+
+			// ===========================================================================================
+			// add lines connecting labels to slice. A polyline creates straight lines connecting several points
+			scope.polylines = scope.svg.select('.' + scope.classPrefix + '-lines');
+
+			var polylines = scope.polylines
+				.selectAll('polyline')
+				.data(pieData, key);
+
+			polylines
+				.enter()
+				.append('polyline')
+				.style('opacity', '0.3')
+				.style('stroke', 'black')
+				.style('stroke-width', '2px')
+				.style('fill', 'none')
+				.attr('points', function(d) {
+					// see label transform function for explanations of these three lines.
+					var pos = scope.outerArc.centroid(d);
+					pos[0] = options.radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+					return [scope.arc.centroid(d), scope.outerArc.centroid(d), pos];
+				});
+
+			polylines.exit().remove();
+
+			scope.polylines.selectAll('polyline')
+				.interrupt()
+				.transition()
+				.duration(options.animations.time)
+				.ease(options.animations.ease)
+				.attrTween('points', function(d) {
+					// see label transform function for explanations of these three lines.
+					var pos = scope.outerArc.centroid(d);
+					pos[0] = options.radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+					return d3.interpolateString(
+						this.getAttribute('points'),
+						[scope.arc.centroid(d), scope.outerArc.centroid(d), pos]
+					);
+				});
+			// ===========================================================================================
+
+			// ===========================================================================================
+      // add tooltip to mouse events on slices and labels
+      d3.selectAll('.' + scope.classPrefix + '-labelName text, .' + scope.classPrefix + '-slices path').call(toolTip);
+      // ===========================================================================================
+			/*
 			var g = scope.svg.selectAll('.' + scope.classPrefix + '-arc');
 
 			var data0 = g.data(),
@@ -1348,6 +1582,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			}
 
 			this.setStyles(scope, options);
+			*/
 		},
 
 		setStyles: function(scope, options) {
@@ -1415,9 +1650,9 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				$log.warn('[Angular - D3] y scale is not defined, unable set zoom behavior');
 				return;
 			}
-			scope.zoom = d3.behavior.zoom()
-				.x(scope.x)
-				.y(scope.y)
+			scope.zoom = d3.zoom()
+				// .x(scope.x)
+				// .y(scope.y)
 				.scaleExtent([0.5, 100])
 				.on('zoom', behavior);
 		},
@@ -1535,6 +1770,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.selectAll('text')
 				.style('display', 'none');
 
+			/*
 			switch(axis.orient()) {
 				case 'left':
 					g.selectAll('.tick.minor line')
@@ -1553,6 +1789,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 						.attr('x2', 4);
 					break;
 			}
+			*/
 		},
 
 		updateStyles: function(scope, options) {

@@ -53,16 +53,17 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		},
 
 		setXScale: function(scope, options) {
-			scope.x = d3.scale.ordinal();
-			//scope.x.range([0, options.width]);
+			scope.x = d3.scaleBand();
+			scope.x
+				.range([0, options.width]);
 
 			if(!d3Helpers.isDefined(scope.xAxis)) {
 				if(!d3Helpers.isDefined(options.x.orient) || !d3Helpers.isString(options.x.orient) ||
-					(options.x.orient !== 'bottom' && options.x.orient !== 'top')) {
-					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "bottom"');
-					options.x.orient = 'bottom';
+					(options.x.orient !== 'axisBottom' && options.x.orient !== 'axisTop')) {
+					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "axisBottom"');
+					options.x.orient = 'axisBottom';
 				}
-				scope.xAxis = d3.svg.axis().scale(scope.x).orient(options.x.orient);
+				scope.xAxis = d3[options.x.orient](scope.x);
 			} else {
 				scope.xAxis.scale(scope.x);
 			}
@@ -76,7 +77,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			var data  = d3Helpers.getDataFromScope(scope, options);
-			scope.x.domain(data.map(function(d) { return d[options.x.key]; })).rangeBands([0, options.width], options.bar.gap);
+			scope.x
+				.domain(data.map(function(d) { return d[options.x.key]; }))
+				.rangeRound([0, options.width], options.bar.gap);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.data)) {
 				this.updateData(scope.data, options);
@@ -86,20 +89,20 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 		setYScale: function(scope, options) {
 			switch(options.y.scale) {
 				case 'log':
-					scope.y = d3.scale.log().clamp(true);
+					scope.y = d3.scaleLog().clamp(true);
 					break;
 				case 'sqrt':
-					scope.y = d3.scale.sqrt();
+					scope.y = d3.scaleSqrt();
 					break;
 				case 'time':
-					scope.y = d3.time.scale();
+					scope.y = d3.scaleTime();
 					break;
 				default:
 					if(options.y.scale !== 'linear') {
 						$log.warn('[Angular - D3] Ticksize must be a string and ["linear", "log", "time", "sqrt"]. Setting default value "linear"');
 						options.y.scale = 'linear';
 					}
-					scope.y = d3.scale.linear();
+					scope.y = d3.scaleLinear();
 					break;
 			}
 
@@ -115,9 +118,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(scope.yAxis)) {
 				if(!d3Helpers.isDefined(options.y.orient) || !d3Helpers.isString(options.y.orient)) {
 					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "left"');
-					options.y.orient = 'left';
+					options.y.orient = 'axisLeft';
 				}
-				scope.yAxis = d3.svg.axis().scale(scope.y).orient(options.y.orient);
+				scope.yAxis = d3[options.y.orient](scope.y);
 			} else {
 				scope.yAxis.scale(scope.y);
 			}
@@ -143,7 +146,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					break;
 				case 'time':
 					if(!d3Helpers.isDefined(options.y.tickFormat)) {
-						var locale = d3Helpers.isDefined(options.locale)? options.locale.timeFormat:d3.time.format;
+						var locale = d3Helpers.isDefined(options.locale)? options.locale.timeFormat:d3.timeFormat;
 						options.y.tickFormat = locale.multi([
 							['.%L', function(d) { return d.getMilliseconds(); }],
 							[':%S', function(d) { return d.getSeconds(); }],
@@ -185,7 +188,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 			$log.debug('[Angular - D3] Data for bars:', data);
 
-			var formatTime = d3.time.format(options.timeFormat);
+			var formatTime = d3.timeFormat(options.timeFormat);
 			var colors = d3Helpers.setColors(options.bar.colors);
 
 			var mapFunction = function(d) {
@@ -247,11 +250,13 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			}
 
 			if(d3Helpers.isDefined(scope.zoom) && d3Helpers.isDefined(options.zoom) && options.zoom) {
-				scope.zoom.x(scope.x).y(scope.y);
+				// scope.zoom.x(scope.x).y(scope.y);
 			}
 
 			var yMaxPoints = d3.max(data.map(function(d){ return d[options.y.key].length; }));
-			var x0 = d3.scale.ordinal().domain(d3.range(yMaxPoints)).rangeRoundBands([0, scope.x.rangeBand()]);
+			var x0 = d3.scaleBand()
+				.domain(d3.range(yMaxPoints))
+				.rangeRound([0, scope.x.bandwidth()]);
 
 			var barsContainer = scope.svg.select('g.' + scope.classPrefix + '-bars');
 			if(barsContainer.empty()) {
@@ -270,8 +275,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							var iconHeight = 115;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/iconHeight);
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
-							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.rangeBand()/2) + ', ' + dy + ')';
-							var inp = d3.interpolateTransform(a, trans);
+							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.bandwidth()/2) + ', ' + dy + ')';
+							var inp = d3.interpolateString(a, trans);
 							return function(t) {
 								return inp(t);
 							};
@@ -302,15 +307,16 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.duration(options.animations.time)
 						.attrTween('transform', function(d, i, a) {
 							d = d3.select(this.parentNode).data()[0];
-							//var percentW = x0.rangeBand()/102;
+							var percentW = x0.bandwidth()/102;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/115);
-							return d3.interpolateString(a, 'scale(' /* + percentW + ', '*/ + percentH + ')');
+							return d3.interpolateString(a, 'scale(' + percentW + ', ' + percentH + ')');
 						})
 						.style('opacity', 0.8);
 				} else {
-					bars.attr('width', x0.rangeBand())
+					bars
+						.attr('width', x0.bandwidth())
 						.attr('title', function(d) {
-							var format = d3.format('0,000');
+							var format = d3.format('.3');
 							return format(d.y);
 						})
 						.attr('x', function(d, i) {
@@ -335,12 +341,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d.y) - scope.y(min));
 						})
+						/*
 						.attrTween('transform', function(d, i, a) {
 							var h = Math.abs(scope.y(d.y) - scope.y(min));
 							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - h):0;
-							var inp = d3.interpolateTransform(a, 'translate(0, ' + dy + ')');
+							var inp = d3.interpolateTransformSvg(a, 'translate(0, ' + dy + ')');
 							return inp;
 						})
+						*/
 						.styleTween('fill', function(d, i, a) {
 							var color = d3.rgb(colors(i));
 							var inp;
@@ -410,7 +418,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.enter()
 						.append('text')
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+							return scope.x(d.x) + x0(i) + x0.bandwidth()/2;
 						})
 						.attr('dy', !options.axis.showPercent? '0.5em':0)
 						.attr('class', scope.classPrefix + '-val')
@@ -429,7 +437,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.enter()
 						.append('text')
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i) + x0.rangeBand()/2;
+							return scope.x(d.x) + x0(i) + x0.bandwidth()/2;
 						})
 						.attr('y', options.height*0.065)
 						.attr('dy', !options.axis.showValues? '-0.5em':0)

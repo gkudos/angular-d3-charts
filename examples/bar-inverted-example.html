@@ -30,21 +30,23 @@
               options: {
                 axis: {
                   stroke: 'red',
+									guidePosition: 'bottom'
                 },
                 bar: {
                   colorInterpolator: d3.interpolateRgb
                 },
                 x: {
                   //tickSize: 0,
-                  position: 'top',
-                  orient: 'axisTop',
+                  position: 'bottom',
+                  orient: 'axisBottom',
                   label: 'Store'
                 },
 
                 y: {
                   position: 'left',
                   orient: 'axisRight',
-                  label: 'Products'
+                  label: 'Products',
+									direction: 'ttb'
                 }
               },
 

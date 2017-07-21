@@ -35,9 +35,9 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				$log.warn('[Angular - D3] y scale is not defined, unable set zoom behavior');
 				return;
 			}
-			scope.zoom = d3.behavior.zoom()
-				.x(scope.x)
-				.y(scope.y)
+			scope.zoom = d3.zoom()
+				// .x(scope.x)
+				// .y(scope.y)
 				.scaleExtent([0.5, 100])
 				.on('zoom', behavior);
 		},
@@ -155,6 +155,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.selectAll('text')
 				.style('display', 'none');
 
+			/*
 			switch(axis.orient()) {
 				case 'left':
 					g.selectAll('.tick.minor line')
@@ -173,6 +174,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 						.attr('x2', 4);
 					break;
 			}
+			*/
 		},
 
 		updateStyles: function(scope, options) {

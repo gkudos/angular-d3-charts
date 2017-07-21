@@ -53,7 +53,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			locale: null,
 			animations: {
 				time: 750,
-				ease: 'cubic-in-out'
+				ease: d3.easeCubic
 			}
 		};
 	}
@@ -166,7 +166,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		},
 
 		setColors: function(userColors, defaultColors) {
-			var colors = defaultColors || d3.scale.category20();
+			var colors = defaultColors || d3.scaleOrdinal(d3.schemeCategory20);
 			if(this.isDefined(userColors)) {
 				colors = this.isArray(userColors)? d3.scale.ordinal().range(userColors):colors;
 				colors = this.isString(userColors)? d3.scale.ordinal().range([userColors]):colors;

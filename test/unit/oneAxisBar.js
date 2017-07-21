@@ -24,20 +24,20 @@ describe('Directive a3oabar', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg').size()).toEqual(1);
+		expect(element.find('svg').length).toEqual(1);
 	});
 
 	it('Should have 1 axis', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .axis').size()).toEqual(1);
+		expect(element.find('svg .axis').length).toEqual(1);
 	});
 
 	it('Should have 1 "g" tag for bars', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .a3oabar-bars').size()).toEqual(1);
+		expect(element.find('svg .a3oabar-bars').length).toEqual(1);
 	});
 });

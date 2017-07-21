@@ -2,7 +2,7 @@
 
 /*jshint -W117 */
 /*jshint globalstrict: true*/
-describe('Directive a3bar', function() {
+describe('Directive a3pie', function() {
 	var $compile, $rootScope, $timeout, barDefaults, scope;
 	var directive = '<a3pie></a3pie>';
 
@@ -20,18 +20,18 @@ describe('Directive a3bar', function() {
 	}));
 
 
-	it('Should have loaded bar chart inside the directive', function() {
+	it('Should have loaded pie chart inside the directive', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg').size()).toEqual(1);
+		expect(element.find('svg').length).toEqual(1);
 	});
 
 	it('Should have 3 arcs for default data', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .a3pie-arc').size()).toEqual(3);
+		expect(element.find('svg .a3pie-slices path').length).toEqual(3);
 	});
 
 	it('Should have 4 arcs for new data', function() {
@@ -40,7 +40,7 @@ describe('Directive a3bar', function() {
 		scope.values = [];
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .a3pie-arc').size()).toEqual(3);
+		expect(element.find('svg .a3pie-slices path').length).toEqual(3);
 		scope.values = [{
 			id: 1,
 			x: 'Ene',
@@ -59,6 +59,6 @@ describe('Directive a3bar', function() {
 			y: 300
 		}];
 		scope.$digest();
-		expect(element.find('svg .a3pie-arc').size()).toEqual(4);
+		expect(element.find('svg .a3pie-slices path').length).toEqual(4);
 	});
 });

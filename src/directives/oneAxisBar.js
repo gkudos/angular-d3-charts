@@ -24,7 +24,7 @@ angular.module('angular-d3-charts').directive('a3oabar', function ($log, d3Helpe
 			d3Helpers.setSize(element, options, attrs);
 
 			// Orient option disabled for this chart.
-			options.x.orient = 'bottom';
+			options.x.orient = 'axisBottom';
 
 			barHelpers.setXScale(scope, options);
 			barHelpers.setYScale(scope, options);

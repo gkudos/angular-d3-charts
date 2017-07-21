@@ -25,21 +25,21 @@ describe('Directive a3bar', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg').size()).toEqual(1);
+		expect(element.find('svg').length).toEqual(1);
 	});
 
 	it('Should have 2 axis', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .axis').size()).toEqual(2);
+		expect(element.find('svg .axis').length).toEqual(2);
 	});
 
 	it('Should have 1 "g" tag for bars', function() {
 		var element = angular.element(directive);
 		element = $compile(element)(scope);
 		scope.$digest();
-		expect(element.find('svg .a3bar-bars').size()).toEqual(1);
+		expect(element.find('svg .a3bar-bars').length).toEqual(1);
 	});
 
 	it('With icons should have loaded bar chart inside the directive', function() {
@@ -54,7 +54,7 @@ describe('Directive a3bar', function() {
 			}
 		});
 		scope.$digest();
-		expect(element.find('svg').size()).toEqual(1);
-		expect(element.find('svg .a3bar-bars .a3bar-group-bar .a3bar-bar').size()).toEqual(9);
+		expect(element.find('svg').length).toEqual(1);
+		expect(element.find('svg .a3bar-bars .a3bar-group-bar .a3bar-bar').length).toEqual(9);
 	});
 });
