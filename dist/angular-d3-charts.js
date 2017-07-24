@@ -368,9 +368,9 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 				randomstring += chars.substring(rnum, rnum+1);
 			}
 			return randomstring;
-        },
+    },
 
-        getRandomColor: function() {
+    getRandomColor: function() {
 			// random values between 0 and 255, these are the 3 colour values
 			var r = Math.floor(Math.random()*256);
 			var g = Math.floor(Math.random()*256);
