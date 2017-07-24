@@ -168,8 +168,8 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		setColors: function(userColors, defaultColors) {
 			var colors = defaultColors || d3.scaleOrdinal(d3.schemeCategory20);
 			if(this.isDefined(userColors)) {
-				colors = this.isArray(userColors)? d3.scale.ordinal().range(userColors):colors;
-				colors = this.isString(userColors)? d3.scale.ordinal().range([userColors]):colors;
+				colors = this.isArray(userColors)? d3.scaleOrdinal().range(userColors):colors;
+				colors = this.isString(userColors)? d3.scaleOrdinal().range([userColors]):colors;
 				colors = this.isFunction(userColors)? userColors:colors;
 			}
 			return colors;

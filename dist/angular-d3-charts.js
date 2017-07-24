@@ -339,8 +339,8 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		setColors: function(userColors, defaultColors) {
 			var colors = defaultColors || d3.scaleOrdinal(d3.schemeCategory20);
 			if(this.isDefined(userColors)) {
-				colors = this.isArray(userColors)? d3.scale.ordinal().range(userColors):colors;
-				colors = this.isString(userColors)? d3.scale.ordinal().range([userColors]):colors;
+				colors = this.isArray(userColors)? d3.scaleOrdinal().range(userColors):colors;
+				colors = this.isString(userColors)? d3.scaleOrdinal().range([userColors]):colors;
 				colors = this.isFunction(userColors)? userColors:colors;
 			}
 			return colors;
@@ -782,7 +782,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			var data  = d3Helpers.getDataFromScope(scope, options);
 			scope.x
 				.domain(data.map(function(d) { return d[options.x.key]; }))
-				.rangeRound([0, options.width], options.bar.gap);
+				.rangeRound([0, options.width])
+				.paddingInner(options.bar.gap);
 			scope.xAxis.tickFormat(options.x.tickFormat);
 			if(d3Helpers.isDefined(scope.data)) {
 				this.updateData(scope.data, options);
@@ -817,7 +818,11 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					dy += options.height*0.05;
 				}
 			}
-			scope.y.range([0, options.height - dy]);
+			if(options.y.direction === 'btt') {
+				scope.y.range([options.height - dy, 0]);
+			} else {
+				scope.y.range([0, options.height - dy]);
+			}
 			if(!d3Helpers.isDefined(scope.yAxis)) {
 				if(!d3Helpers.isDefined(options.y.orient) || !d3Helpers.isString(options.y.orient)) {
 					$log.warn('[Angular - D3] Tick orient must be a string. Setting default value "left"');
@@ -845,7 +850,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						};
 					}
 					scope.yAxis.ticks(options.y.ticks);
-					scope.y.domain(options.y.direction === 'btt'? [1000, 0.1]:[0.1, 1000]);
+					scope.y.domain([0.1, 1000]);
 					break;
 				case 'time':
 					if(!d3Helpers.isDefined(options.y.tickFormat)) {
@@ -865,7 +870,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					break;
 				default:
 					scope.yAxis.ticks(options.y.ticks + options.y.ticks * options.y.tickSubdivide);
-					scope.y.domain(options.y.direction === 'btt'? [100, 0]:[0, 100]);
+					scope.y.domain([0, 100]);
 					break;
 			}
 			scope.yAxis.tickFormat(options.y.tickFormat);
@@ -942,7 +947,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				max = max instanceof Date? max:(max + Math.abs(max/2));
 			}
 
-			scope.y.domain(options.y.direction === 'btt'? [max, min]:[min, max]);
+			scope.y.domain([min, max]);
 			if(min < max) {
 				scope.y.nice();
 			}
@@ -977,7 +982,7 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.attrTween('transform', function(d, i, a) {
 							var iconHeight = 115;
 							var percentH = Math.abs((scope.y(d.y) - scope.y(min))/iconHeight);
-							var dy = options.y.direction === 'btt'? (scope.y.range()[1] - iconHeight*percentH):0;
+							var dy = 0;
 							var trans = 'translate(' + (scope.x(d.x) + x0(i) - 102*percentH/2 + x0.bandwidth()/2) + ', ' + dy + ')';
 							var inp = d3.interpolateString(a, trans);
 							return function(t) {
@@ -1025,12 +1030,14 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.attr('x', function(d, i) {
 							return scope.x(d.x) + x0(i);
 						})
+						.attr('y', function() {
+							var h = d3.select(this).attr('height');
+							var dy = options.y.direction === 'btt'? scope.y(0)-h:0;
+							return dy;
+						})
 						.attr('height', function() {
 							var h = d3.select(this).attr('height');
 							return h? h:0;
-						})
-						.attr('transform', function() {
-							return 'translate(0, ' + (options.y.direction === 'btt'? scope.y.range()[1]:0) + ')';
 						})
 						//.style('opacity', 0)
 						.style('fill', function() {
@@ -1043,6 +1050,11 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.duration(options.animations.time)
 						.attr('height', function(d) {
 							return Math.abs(scope.y(d.y) - scope.y(min));
+						})
+						.attr('y', function(d) {
+							var h = Math.abs(scope.y(d.y) - scope.y(min));
+							var dy = options.y.direction === 'btt'? scope.y(0)-h:0;
+							return dy;
 						})
 						/*
 						.attrTween('transform', function(d, i, a) {
@@ -1664,7 +1676,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			scope.xlLeftOffset = 0;
 			if(options.axis.show && options.y.position === 'left') {
 				scope.xlLeftOffset = 30;
-				if(options.y.orient === 'right') {
+				if(options.y.orient === 'axisRight') {
 					scope.xlLeftOffset += 10;
 				}
 			}
@@ -1676,7 +1688,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
 				switch(options.x.position) {
 					case 'top':
-						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'bottom'? 0:20) + ')');
+						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'axisBottom'? 0:20) + ')');
 						break;
 					default:
 						if(!d3Helpers.isDefined(options.x.position) || !d3Helpers.isString(options.x.position) ||
@@ -1685,12 +1697,12 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 							options.x.position = 'bottom';
 						}
 						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-							(options.height + (options.x.orient === 'bottom'? 0:20))+ ')');
+							(options.height + (options.x.orient === 'axisBottom'? 0:20))+ ')');
 						break;
 				}
 			} else if(d3Helpers.isNumber(options.x.position)) {
 				scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-					(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
+					(options.x.orient === 'axisBottom'? (options.x.position + 20):options.x.position) + ')');
 			}
 
 			scope.xl.call(scope.xAxis);
@@ -1700,7 +1712,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 					.attr('class', 'label')
 					.attr('transform', 'translate(' + (options.width) + ')')
 					.attr('dx', '0.8em')
-					.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
+					.attr('dy', options.x.orient === 'axisBottom'? '1.35em':0)
 					.style('text-anchor', 'start')
 					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
@@ -1720,7 +1732,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(options.y.position) || d3Helpers.isString(options.y.position)) {
 				switch(options.y.position) {
 					case 'right':
-						scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'left'? 20:0)) + ',' +
+						scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'axisLeft'? 20:0)) + ',' +
 								(scope.ylTopOffset) + ')');
 						break;
 					default:
@@ -1729,12 +1741,12 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 							$log.warn('[Angular - D3] Y Axis position must be a string. Setting default value "left"');
 							options.y.position = 'left';
 						}
-						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
+						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'axisLeft'? 20:0) + ',' +
 								(scope.ylTopOffset) + ')');
 						break;
 				}
 			} else if(d3Helpers.isNumber(options.y.position)) {
-				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
+				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'axisLeft'? 20:0)) + ',' +
 						(scope.ylTopOffset) + ')');
 			}
 

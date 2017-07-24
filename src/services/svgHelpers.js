@@ -49,7 +49,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			scope.xlLeftOffset = 0;
 			if(options.axis.show && options.y.position === 'left') {
 				scope.xlLeftOffset = 30;
-				if(options.y.orient === 'right') {
+				if(options.y.orient === 'axisRight') {
 					scope.xlLeftOffset += 10;
 				}
 			}
@@ -61,7 +61,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(options.x.position) || d3Helpers.isString(options.x.position)) {
 				switch(options.x.position) {
 					case 'top':
-						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'bottom'? 0:20) + ')');
+						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' + (options.x.orient === 'axisBottom'? 0:20) + ')');
 						break;
 					default:
 						if(!d3Helpers.isDefined(options.x.position) || !d3Helpers.isString(options.x.position) ||
@@ -70,12 +70,12 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 							options.x.position = 'bottom';
 						}
 						scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-							(options.height + (options.x.orient === 'bottom'? 0:20))+ ')');
+							(options.height + (options.x.orient === 'axisBottom'? 0:20))+ ')');
 						break;
 				}
 			} else if(d3Helpers.isNumber(options.x.position)) {
 				scope.xl.attr('transform', 'translate(' + scope.xlLeftOffset + ', ' +
-					(options.x.orient === 'bottom'? (options.x.position + 20):options.x.position) + ')');
+					(options.x.orient === 'axisBottom'? (options.x.position + 20):options.x.position) + ')');
 			}
 
 			scope.xl.call(scope.xAxis);
@@ -85,7 +85,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 					.attr('class', 'label')
 					.attr('transform', 'translate(' + (options.width) + ')')
 					.attr('dx', '0.8em')
-					.attr('dy', options.x.orient === 'bottom'? '1.35em':0)
+					.attr('dy', options.x.orient === 'axisBottom'? '1.35em':0)
 					.style('text-anchor', 'start')
 					.style('font-size', '1.1em')
 					.style('font-weight', 'bold')
@@ -105,7 +105,7 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			if(!d3Helpers.isDefined(options.y.position) || d3Helpers.isString(options.y.position)) {
 				switch(options.y.position) {
 					case 'right':
-						scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'left'? 20:0)) + ',' +
+						scope.yl.attr('transform', 'translate(' + (options.width + (options.y.orient === 'axisLeft'? 20:0)) + ',' +
 								(scope.ylTopOffset) + ')');
 						break;
 					default:
@@ -114,12 +114,12 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 							$log.warn('[Angular - D3] Y Axis position must be a string. Setting default value "left"');
 							options.y.position = 'left';
 						}
-						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'left'? 20:0) + ',' +
+						scope.yl.attr('transform', 'translate(' + (options.y.orient === 'axisLeft'? 20:0) + ',' +
 								(scope.ylTopOffset) + ')');
 						break;
 				}
 			} else if(d3Helpers.isNumber(options.y.position)) {
-				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'left'? 20:0)) + ',' +
+				scope.yl.attr('transform', 'translate(' + (options.y.position - (options.y.orient === 'axisLeft'? 20:0)) + ',' +
 						(scope.ylTopOffset) + ')');
 			}
 
