@@ -1,0 +1,62 @@
+[
+  {
+    "label": "Sector Privado",
+    "amount": null,
+    "refundable": null
+  },
+  {
+    "label": "Estado",
+    "amount": "238410419",
+    "refundable": "100000000"
+  },
+  {
+    "label": "Actor No Estatal",
+    "amount": "233554004",
+    "refundable": "180000000"
+  },
+  {
+    "label": "sin asignar",
+    "amount": "70729523",
+    "refundable": "0"
+  },
+  {
+    "label": "ONG Internacional",
+    "amount": "17326140",
+    "refundable": "0"
+  },
+  {
+    "label": "Organismo Internacional",
+    "amount": "737383",
+    "refundable": "0"
+  },
+  {
+    "label": "Otros",
+    "amount": "536452",
+    "refundable": "0"
+  },
+  {
+    "label": "Otros 1",
+    "amount": "536452",
+    "refundable": "0"
+  },
+  {
+    "label": "Otros 3",
+    "amount": "536452",
+    "refundable": "0"
+  },
+  {
+    "label": "Institución Educativa",
+    "amount": "200000",
+    "refundable": "0"
+  },
+  {
+    "label": "Institución Educativa asdas",
+    "amount": "200000",
+    "refundable": "0"
+  },
+  {
+    "label": "Entidad Mixta",
+    "amount": "200000",
+    "refundable": "0"
+  }
+]

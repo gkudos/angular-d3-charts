@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html ng-app="demoapp">
+	<head>
+		<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="../bower_components/angular/angular.min.js"></script>
+		<script src="../bower_components/d3/d3.js"></script>
+		<script src="../dist/angular-d3-charts.js"></script>
+		<script>
+				var app = angular.module("demoapp", ['angular-d3-charts']);
+				app.controller("DemoController", [ "$scope", "$http", "$log", function($scope, $http, $log) {
+						// Nothing here!
+						angular.extend($scope, {
+							options: {
+								innerRadius: 10,
+					      showPercent: true,
+					      pieAnimation: 'normal',
+					      x: {
+					        key: 'label',
+					        show: false
+					      },
+					      y: {
+					        key: 'norefundable',
+					        label: 'y'
+					      },
+					      legend: {
+					        show: false
+					      }
+							},
+
+							values: [],
+
+							changeValues: function() {
+								var aux = $scope.values;
+								$scope.values = oldValues;
+								oldValues = aux;
+							}
+						});
+
+						$http.get('data/pie2.json')
+							.then(function(res) {
+								var data = res.data.filter(function(d) {
+					        d.norefundable = d.amount - d.refundable;
+					        return (d.norefundable);
+					      });
+								$scope.values = data
+							}, function(err) {
+								$log.error('Error loading data', err);
+							});
+				}]);
+		</script>
+	</head>
+	<body ng-controller="DemoController">
+		<a3pie width="500px" height="300px" options="options" data="values"></a3pie>
+	</body>
+</html>

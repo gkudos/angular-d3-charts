@@ -1266,6 +1266,54 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 		return tip;
 	};
 
+	var intersect = function(a, b) {
+	  return (a.left <= b.right &&
+	          b.left <= a.right &&
+	          a.top <= b.bottom &&
+	          b.top <= a.bottom);
+	};
+
+	var wrap = function(text, width) {
+    text = d3.select(text);
+		var words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr('y'),
+        dy = parseFloat(text.attr('dy')),
+        tspan = text.text(null).append('tspan').attr('x', 0).attr('y', y).attr('dy', dy + 'em');
+    while(word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(' '));
+      if(tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(' '));
+        line = [word];
+        tspan = text.append('tspan').attr('x', 0).attr('y', y).attr('dy', ++lineNumber * lineHeight + dy + 'em').text(word);
+      }
+    }
+	};
+
+	var getTranslation = function(transform) {
+		// Create a dummy g for calculation purposes only. This will never
+		// be appended to the DOM and will be discarded once this function
+		// returns.
+		var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+		// Set the transform attribute to the provided string value.
+		g.setAttributeNS(null, 'transform', transform);
+
+		// consolidate the SVGTransformList containing all transformations
+		// to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
+		// its SVGMatrix.
+		var matrix = g.transform.baseVal.consolidate().matrix;
+
+		// As per definition values e and f are the ones for the translation.
+		return [matrix.e, matrix.f];
+	};
+
+
 	return {
 		addArc: function(scope, options) {
 			var w = options.width - options.margin.left - options.margin.right;
@@ -1406,6 +1454,8 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return d.data[options.x.key] + ': <tspan>' + percentFormat(d.data[options.y.key]/total) + '</tspan>';
 				})
 				.attr('transform', function(d) {
+					var rect1 = this.getBoundingClientRect();
+					$log.debug('Rectangle Enter:', rect1.top, rect1.left);
 					// effectively computes the centre of the slice.
 					// see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
 					var pos = scope.outerArc.centroid(d);
@@ -1434,10 +1484,35 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.attr('transform', function(d) {
 					// effectively computes the centre of the slice.
 					// see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+					var rect1 = this.getBoundingClientRect();
+					// var $this = this;
+					$log.debug('Rectangle:', rect1.top, rect1.left);
+
+					if(rect1.left < 0) {
+						wrap(this, rect1.right);
+					} else if(rect1.right > options.width) {
+						wrap(this, options.width - rect1.left);
+					}
+
 					var pos = scope.outerArc.centroid(d);
+
+					/*
+					var intersects = 0;
+					scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
+						.each(function() {
+							var rect2 = this.getBoundingClientRect();
+							var data = d3.select(this).data()[0];
+							if(intersect(rect1, rect2) && this !== $this) {
+								$log.debug('Intersect', d.data[options.x.key], data.data[options.x.key]);
+								intersects++;
+							}
+						});
+
+					*/
 
 					// changes the point to be on left or right depending on where label is.
 					pos[0] = options.radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+					// pos[1] = pos[1] + rect1.height * intersects;
 					return 'translate(' + pos + ')';
 				})
 				.style('text-anchor', function(d) {
@@ -1490,115 +1565,131 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
       // add tooltip to mouse events on slices and labels
       d3.selectAll('.' + scope.classPrefix + '-labelName text, .' + scope.classPrefix + '-slices path').call(toolTip);
       // ===========================================================================================
-			/*
-			var g = scope.svg.selectAll('.' + scope.classPrefix + '-arc');
-
-			var data0 = g.data(),
-      data1 = scope.pie(data);
-
-			var key = function(d) {
-				return d.data[options.idKey];
-			};
-
-			var arcTween = function() {
-				return _tweenPie(this, scope, options, d3.select(this.parentNode).data()[0]);
-			};
-
-			var gData = g.data(data1, key);
-
-			g = gData.enter().append('g')
-				.each(function(d, i) {
-					this._current = findNeighborArc(i, data0, data1, key) || d;
-				})
-	      .attr('class', scope.classPrefix + '-arc');
-
-			g.append('path')
-				.style('opacity', 0)
-				.style('fill', function(d) {
-					return colors(d.data[options.x.key]);
-				})
-				.style('stroke', options.borderColor);
-
-			g.append('text')
-	      .attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-	      .attr('dy', options.x.show? '-0.75em':0)
-				.attr('class', scope.classPrefix + '-arc-val')
-				.style('text-anchor', 'middle')
-	      .text(function(d) {
-					var text;
-
-					if(options.showPercent) {
-						var format = d3.format('%');
-						text = format(d.data[options.y.key]/total);
-					} else {
-						text = d.data[options.y.key];
-					}
-					return text;
-				});
-
-			if(options.x.show) {
-				g.append('text')
-					.attr('transform', function(d) { return 'translate(' + scope.arc.centroid(d) + ')'; })
-					.attr('dy', '.75em')
-					.attr('class', scope.classPrefix + '-arc-label')
-					.style('text-anchor', 'middle')
-					.text(function(d) {
-						return d.data[options.x.key];
-					});
-			}
-
-			gData.exit()
-				.datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
-				.remove();
-
-			gData.selectAll('path')
-				.interrupt()
-				.transition()
-				.duration(options.animations.time)
-				.ease(options.animations.ease)
-				.attrTween('d', arcTween)
-				.style('opacity', 1);
-
-			gData.selectAll('.' + scope.classPrefix + '-arc-val')
-				.text(function() {
-					var d = d3.select(this.parentNode).data()[0];
-					var text;
-
-					if(options.showPercent) {
-						var format = d3.format('%');
-						text = format(d.data[options.y.key]/total);
-					} else {
-						text = d.data[options.y.key];
-					}
-					return text;
-				})
-				.transition()
-				.duration(750)
-				.attrTween('transform', function(da, i, a) {
-					var d = d3.select(this.parentNode).data()[0];
-					return d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-				});
-
-			if(options.x.show) {
-				gData.selectAll('.' + scope.classPrefix + '-arc-label')
-					.text(function() {
-						var d = d3.select(this.parentNode).data()[0];
-						return d.data[options.x.key];
-					})
-					.transition()
-					.duration(750)
-					.attrTween('transform', function(da, i, a) {
-						var d = d3.select(this.parentNode).data()[0];
-						return d3.interpolateTransform(a, 'translate(' + scope.arc.centroid(d) + ')');
-					});
-			}
 
 			this.setStyles(scope, options);
+			// this.wrapLabels(scope, options);
+			//this.resolveLabelConflics(scope, options);
+			this.arrangeLabels(scope, options);
+			/*
+			while(hasIntersections) {
+				hasIntersections = this.resolveLabelConflics(scope, options);
+			}
 			*/
 		},
 
+		resolveLabelConflics: function(scope, options) {
+			var labels = scope.svg.selectAll('.' + scope.classPrefix + '-labelName text');
+			var countMoves = 0;
+			labels
+				.each(function() {
+					var rect1 = this.getBoundingClientRect();
+					var text1 = d3.select(this);
+					var $this = this;
+					var moved = true;
+
+					var move = function() {
+						countMoves++;
+						var rect2 = this.getBoundingClientRect();
+						//var text2 = d3.select(this);
+
+						if($this !== this) {
+							if(intersect(rect1, rect2)) {
+								var d = text1.data()[0];
+								var pos = scope.outerArc.centroid(d);
+								var toRight = (midAngle(d) < Math.PI ? 1 : -1) * (rect1.left < 0? -1:1);
+								pos[0] = options.radius * 0.95 * toRight;
+								if(!d.data.intersects) {
+									d.data.intersects = 0;
+								}
+
+								d.data.intersects++;
+								pos[1] = pos[1] + rect1.height*d.data.intersects;
+								$log.debug('Data:', d, pos);
+								text1
+									.interrupt()
+									.attr('transform', 'translate(' + pos + ')')
+									.style('fill', 'red')
+									.style('text-anchor', toRight === 1? 'start':'end');
+								rect1 = $this.getBoundingClientRect();
+								moved = true;
+							}
+						}
+					};
+					if(moved) {
+						moved = false;
+						labels.each(move);
+					}
+
+					$log.debug('Moves', countMoves);
+				});
+		},
+
+		arrangeLabels: function(scope, options) {
+			var move = 1;
+			var moveLabels = function() {
+				var that = this,
+				a = this.getBoundingClientRect();
+				scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
+					.each(function() {
+						if(this !== that) {
+							var b = this.getBoundingClientRect();
+							if(intersect(a, b)) {
+								// overlap, move labels
+								var dy = (Math.max(0, a.bottom - b.top) + Math.min(0, a.top - b.bottom))*0.1,
+								tt = getTranslation(d3.select(this).attr('transform')),
+								to = getTranslation(d3.select(that).attr('transform'));
+								move += Math.abs(dy);
+
+								var ttAnchor = d3.select(this).style('text-anchor');
+								var toAnchor = d3.select(that).style('text-anchor');
+								if((to[1] + dy) < options.radius) {
+									to = [ to[0], to[1] + dy ];
+								} else {
+									to = [ -to[0], to[1]];
+									toAnchor = toAnchor === 'start'? 'end':'start';
+								}
+
+								if((tt[1] - dy) > -options.radius) {
+									tt = [ tt[0], tt[1] - dy ];
+								} else {
+									tt = [ -tt[0], tt[1] ];
+									ttAnchor = ttAnchor === 'start'? 'end':'start';
+								}
+
+								d3.select(this)
+									.interrupt()
+									.attr('transform', 'translate(' + tt + ')')
+									.style('text-anchor', ttAnchor);
+								d3.select(that)
+									.interrupt()
+									.attr('transform', 'translate(' + to + ')')
+									.style('text-anchor', toAnchor);
+								a = this.getBoundingClientRect();
+							}
+						}
+					});
+			};
+			while(move > 0) {
+				move = 0;
+				scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
+					.each(moveLabels);
+			}
+		},
+
+		wrapLabels: function(scope, options) {
+			scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
+				.each(function() {
+					var rect = this.getBoundingClientRect();
+					if(rect.left < 0) {
+						wrap(this, rect.right);
+					} else if(rect.right > options.width) {
+						wrap(this, options.width - rect.left);
+					}
+				});
+		},
+
 		setStyles: function(scope, options) {
-			scope.svg.selectAll('.' + scope.classPrefix + '-arc text')
+			scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
 				.style('fill', options.axis.color)
 				.style('font-weight', options.axis.fontWeight);
 
