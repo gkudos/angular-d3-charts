@@ -1430,7 +1430,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.append('text')
 				.attr('x', '25px')
 				.attr('y', 0)
-				.attr('dy', '-0.15em')
+				.attr('dy', '0')
 				.attr('dx', '25px')
 				.html(function() {
 					var d = d3.select(this.parentNode).data()[0];
@@ -1447,9 +1447,10 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			var currentY = 0;
 			scope.legend
 				.selectAll('.legend-item')
-				.attr('transform', function() {
-					var oldY = currentY;
+				.attr('transform', function(d, i) {
+					var oldY = Math.max(currentY, 20*i);
 					currentY += d3.select(this).select('text').node().getBoundingClientRect().height + 10;
+
 					return 'translate(0, ' + oldY + ')';
 				});
 		},
