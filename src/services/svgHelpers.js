@@ -1,5 +1,8 @@
 angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Helpers) {
 	return {
+		/**
+		 * Add SVG element to DOM.
+		 */
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
 			w += options.legend.show? options.legend.width:0;
@@ -26,6 +29,9 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			return svg;
 		},
 
+		/**
+		 * Add Zoom Behaviour to chart.
+		 */
 		addZoomBehaviour: function(scope, behavior) {
 			if(!d3Helpers.isDefined(scope.x)) {
 				$log.warn('[Angular - D3] x scale is not defined, unable set zoom behavior');
@@ -42,6 +48,10 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 				.on('zoom', behavior);
 		},
 
+
+		/**
+		 * Add X Axis to chart.
+		 */
 		addXAxis: function(scope, options) {
 			scope.xl = scope.svg.append('g')
 				.attr('class', 'x axis');
@@ -93,6 +103,9 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			}
 		},
 
+		/**
+		 * Add Y Axis to chart.
+		 */
 		addYAxis: function(scope, options) {
 			scope.yl = scope.svg.append('g')
 				.attr('class', 'y axis');
@@ -138,6 +151,9 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			}
 		},
 
+		/**
+		 * Add Subdivide Ticks to chart.
+		 */
 		addSubdivideTicks: function(g, scale, axis, options) {
 			g.selectAll('.tick.minor')
 				.classed('minor', false)
@@ -177,6 +193,10 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 			*/
 		},
 
+
+		/**
+		 * Refresh chart CSS styles.
+		 */
 		updateStyles: function(scope, options) {
 			var stroke = scope.type === 'bar'? options.axis.stroke:null;
 
@@ -208,6 +228,71 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 
 			scope.svg.style('font-family', options.fontFamily);
 			scope.svg.style('font-size', options.fontSize);
+		},
+
+		/**
+		 * Wrap Text Node on determinate width.
+		 *
+		 * @param {string} text Text to wrap.
+		 * @param {number} width Max width for text element.
+		 */
+		wrap: function(text, width) {
+	    text = d3.select(text);
+			var words = text.text().split(/\s+/).reverse(),
+	        word,
+	        line = [],
+	        lineNumber = 0,
+	        lineHeight = 1.1, // ems
+	        y = text.attr('y'),
+	        dy = parseFloat(text.attr('dy')),
+	        dx = text.attr('dx');
+
+			var tspan =
+				text.text(null)
+					.append('tspan')
+					.attr('x', 0)
+					.attr('y', y)
+					.attr('dx', dx)
+					.attr('dy', dy + 'em');
+	    while(word = words.pop()) {
+	      line.push(word);
+	      tspan.text(line.join(' '));
+	      if(tspan.node().getComputedTextLength() > width) {
+	        line.pop();
+	        tspan.text(line.join(' '));
+	        line = [word];
+	        tspan =
+						text.append('tspan')
+							.attr('x', 0)
+							.attr('y', y)
+							.attr('dx', dx)
+							.attr('dy', ++lineNumber * lineHeight + dy + 'em')
+							.text(word);
+	      }
+	    }
+		},
+
+		/**
+		 * Get translation from an transform string.
+		 *
+		 * @param {string} transform Transform string.
+		 */
+		getTranslation: function(transform) {
+			// Create a dummy g for calculation purposes only. This will never
+			// be appended to the DOM and will be discarded once this function
+			// returns.
+			var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+			// Set the transform attribute to the provided string value.
+			g.setAttributeNS(null, 'transform', transform);
+
+			// consolidate the SVGTransformList containing all transformations
+			// to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
+			// its SVGMatrix.
+			var matrix = g.transform.baseVal.consolidate().matrix;
+
+			// As per definition values e and f are the ones for the translation.
+			return [matrix.e, matrix.f];
 		}
 	};
 });
