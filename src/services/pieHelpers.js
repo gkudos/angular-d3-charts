@@ -136,12 +136,6 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				return;
 			}
 
-			/*
-			var total = d3.sum(data, function(d) {
-				return d[options.y.key];
-			});
-			*/
-
 			// Key function for get data.
 			var key = function(d) {
 				if(angular.isUndefined(d)) {
@@ -182,6 +176,12 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 						pathAnim(d3.select(this), 0, options, colors);
 					});
 				})
+				.attrTween('fill', function(d) {
+					if(angular.isDefined(options.colorKey) && angular.isDefined(d.data[options.colorKey])) {
+						return d.data[options.colorKey];
+					}
+					return colors(d.data[options.x.key]);
+				})
 				.attrTween('d', arcTween);
 
 			arcs.enter()
@@ -196,9 +196,11 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					}
 				})
 				.attr('fill', function(d) {
+					if(angular.isDefined(options.colorKey) && angular.isDefined(d.data[options.colorKey])) {
+						return d.data[options.colorKey];
+					}
 					return colors(d.data[options.x.key]);
 				})
-
 				.transition('pie-enter')
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
