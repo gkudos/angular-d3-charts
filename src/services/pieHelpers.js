@@ -72,6 +72,37 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
     return null;
   }
 
+	var pathAnim = function(path, dir, options, colors) {
+		switch(dir) {
+			case 0:
+				path
+					.style('stroke', null)
+					.transition('pie-animation')
+					.duration(500)
+					.ease(d3.easeBounce)
+					.style('stroke-opacity', 0)
+					.style('stroke-width', 0)
+					.attr('d', d3.arc()
+						.outerRadius(options.radius)
+					);
+				break;
+			case 1:
+				path
+					.style('stroke', function(d) {
+						return d3.color(colors(d.data[options.x.key])).darker(0.5);
+					})
+					.style('stroke-opacity', 0)
+					.style('stroke-width', 0)
+					.transition('pie-animation')
+					.style('stroke-opacity', 1)
+					.style('stroke-width', 1)
+					.attr('d', d3.arc()
+						.outerRadius(options.radius * 1.06)
+					);
+				break;
+		}
+	};
+
 	return {
 		addArc: function(scope, options) {
 			var w = options.width - options.margin.left - options.margin.right;
@@ -138,9 +169,19 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			var arcs = path.data(pieData, key);
 
 			arcs
+				.on('mouseout', null)
+				.on('mouseover', null)
 				.transition()
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
+				.on('end', function() {
+					d3.select(this).on('mouseover', function() {
+						pathAnim(d3.select(this), 1, options, colors);
+					})
+					.on('mouseout', function() {
+						pathAnim(d3.select(this), 0, options, colors);
+					});
+				})
 				.attrTween('d', arcTween);
 
 			arcs.enter()
@@ -157,13 +198,27 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.attr('fill', function(d) {
 					return colors(d.data[options.x.key]);
 				})
-				.transition()
+
+				.transition('pie-enter')
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
+				.on('end', function() {
+					d3.select(this).on('mouseover', function() {
+						pathAnim(d3.select(this), 1, options, colors);
+					})
+					.on('mouseout', function() {
+						pathAnim(d3.select(this), 0, options, colors);
+					});
+				})
 				.attrTween('d', arcTween);
 
 			arcs
 				.exit()
+				.each(function() {
+					d3.select(this)
+					.on('mouseout', null)
+					.on('mouseover', null);
+				})
 				.transition()
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
