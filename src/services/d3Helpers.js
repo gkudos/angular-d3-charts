@@ -118,6 +118,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		setDefaults: function(newDefaults, userDefaults) {
 			if (this.isDefined(userDefaults)) {
 				newDefaults.idKey = this.isDefined(userDefaults.idKey) ?  userDefaults.idKey : newDefaults.idKey;
+				newDefaults.colorKey = this.isDefined(userDefaults.colorKey) ?  userDefaults.colorKey : newDefaults.colorKey;
 				newDefaults.width = this.isDefined(userDefaults.width) ?  userDefaults.width : newDefaults.width;
 				newDefaults.heigth = this.isDefined(userDefaults.heigth) ?  userDefaults.heigth : newDefaults.heigth;
 				newDefaults.zoom = this.isDefined(userDefaults.zoom) ?  userDefaults.zoom : newDefaults.zoom;

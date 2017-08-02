@@ -72,7 +72,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
     return null;
   }
 
-	var pathAnim = function(path, dir, options, colors) {
+	var pathAnim = function(path, dir, options) {
 		switch(dir) {
 			case 0:
 				path
@@ -88,8 +88,8 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				break;
 			case 1:
 				path
-					.style('stroke', function(d) {
-						return d3.color(colors(d.data[options.x.key])).darker(0.5);
+					.style('stroke', function() {
+						return d3.color(d3.select(this).attr('fill')).darker();
 					})
 					.style('stroke-opacity', 0)
 					.style('stroke-width', 0)
@@ -170,10 +170,10 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.ease(options.animations.ease)
 				.on('end', function() {
 					d3.select(this).on('mouseover', function() {
-						pathAnim(d3.select(this), 1, options, colors);
+						pathAnim(d3.select(this), 1, options);
 					})
 					.on('mouseout', function() {
-						pathAnim(d3.select(this), 0, options, colors);
+						pathAnim(d3.select(this), 0, options);
 					});
 				})
 				.attrTween('fill', function(d) {
@@ -206,10 +206,10 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				.ease(options.animations.ease)
 				.on('end', function() {
 					d3.select(this).on('mouseover', function() {
-						pathAnim(d3.select(this), 1, options, colors);
+						pathAnim(d3.select(this), 1, options);
 					})
 					.on('mouseout', function() {
-						pathAnim(d3.select(this), 0, options, colors);
+						pathAnim(d3.select(this), 0, options);
 					});
 				})
 				.attrTween('d', arcTween);
