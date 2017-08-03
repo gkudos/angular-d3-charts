@@ -903,8 +903,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 			var colors = d3Helpers.setColors(options.bar.colors);
 
 			var mapFunction = function(d) {
-				return d[options.y.key].map(function(e) {
+				return d[options.y.key].map(function(e, i) {
 					return {
+						id: i,
 						parentId: d[options.idKey],
 						x: d[options.x.key],
 						y: e
@@ -1031,7 +1032,8 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 							return format(d.y);
 						})
 						.attr('x', function(d, i) {
-							return scope.x(d.x) + x0(i);
+							var x = scope.x(d.x) + x0(i);
+							return isNaN(x)? 0:x;
 						})
 						.attr('y', function() {
 							var h = d3.select(this).attr('height');
@@ -1090,28 +1092,52 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 					});
 			};
 
-			var barGroups = barsContainer.selectAll('.' + scope.classPrefix + '-group-bar')
+			var barGroups = barsContainer
+				.selectAll('.' + scope.classPrefix + '-group-bar')
 				.data(data, _idFunction);
-			barGroups.interrupt();
+			// barGroups.interrupt();
 
-			barGroups.exit().remove();
+			barGroups.each(function(d) {
+				var barGroup = d3.select(this);
+				var bars = barGroup
+					.selectAll('.' + scope.classPrefix + '-bar')
+					.data(function() {
+						var newData = mapFunction(d);
+						return newData;
+					}, function(d) {
+						return d.id;
+					});
 
-			var bars = barGroups.selectAll('.' + scope.classPrefix + '-bar').data(mapFunction);
-			bars.interrupt();
-			updateBars(bars, true);
-			bars.exit().remove();
+
+				updateBars(bars, true);
+				bars
+					.enter()
+					.append(d3Helpers.isDefined(options.bar.path)? 'g':'rect')
+					.attr('class', scope.classPrefix + '-bar');
+				updateBars(bars, true);
+				bars.exit().remove();
+				bars = barGroup
+					.selectAll('.' + scope.classPrefix + '-bar');
+				updateBars(bars, true);
+			});
+
 
 			var series = barGroups.enter()
 				.append('g')
 				.attr('class', scope.classPrefix + '-group-bar');
 
-			bars = series.selectAll('.' + scope.classPrefix + '-bar')
-				.data(mapFunction)
-				.interrupt()
+			var bars = series.selectAll('.' + scope.classPrefix + '-bar')
+				.data(mapFunction, function(d) {
+					return d.id;
+				})
+				// .interrupt()
 				.enter()
 				.append(d3Helpers.isDefined(options.bar.path)? 'g':'rect')
 				.attr('class', scope.classPrefix + '-bar');
 			updateBars(bars);
+
+			//bars.exit().remove();
+			barGroups.exit().remove();
 
 			if(scope.type === 'oneAxisBar') {
 				scope.svg.select('g.' + scope.classPrefix +'-helptext').remove();
@@ -1131,7 +1157,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 
 				if(options.axis.showValues) {
 					series.selectAll('.' + scope.classPrefix + '-val')
-						.data(mapFunction)
+						.data(mapFunction, function(d) {
+							return d.id;
+						})
 						.interrupt()
 						.enter()
 						.append('text')
@@ -1150,7 +1178,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 
 				if(options.axis.showPercent) {
 					series.selectAll('.' + scope.classPrefix + '-percent')
-						.data(mapFunction)
+						.data(mapFunction, function(d) {
+							return d.id;
+						})
 						.interrupt()
 						.enter()
 						.append('text')
