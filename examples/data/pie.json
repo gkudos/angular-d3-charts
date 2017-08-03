@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Alemania (DEU)",
+    "abbreviature": "DEU",
+    "amount": "84286657",
+    "refundable": "0"
+  },
+  {
+    "label": "Comisión Europea (CE)",
+    "abbreviature": "CE",
+    "amount": "121659358",
+    "refundable": "0"
+  }
+]

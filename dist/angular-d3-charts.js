@@ -1384,7 +1384,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 						pathAnim(d3.select(this), 0, options);
 					});
 				})
-				.attrTween('fill', function(d) {
+				.attr('fill', function(d) {
 					if(angular.isDefined(options.colorKey) && angular.isDefined(d.data[options.colorKey])) {
 						return d.data[options.colorKey];
 					}
