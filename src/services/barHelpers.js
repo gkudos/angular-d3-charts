@@ -385,6 +385,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 				bars.append('title')
 					.text(function(d) {
 						var format = d3.format('.3g');
+						if(d3Helpers.isDefined(options.y.tickFormat)) {
+							format = options.y.tickFormat;
+						}
 						return format(d.y);
 					});
 			};
