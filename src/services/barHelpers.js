@@ -323,6 +323,9 @@ angular.module('angular-d3-charts').factory('barHelpers', function ($log, d3Help
 						.attr('width', x0.bandwidth())
 						.attr('title', function(d) {
 							var format = d3.format('.3');
+							if(d3Helpers.isDefined(options.y.tickFormat)) {
+								format = options.y.tickFormat;
+							}
 							return format(d.y);
 						})
 						.attr('x', function(d, i) {
