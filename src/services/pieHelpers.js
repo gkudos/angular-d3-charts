@@ -165,6 +165,13 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			arcs
 				.on('mouseout', null)
 				.on('mouseover', null)
+				.select('title')
+					.text(function(d) {
+						return d.data[options.x.key];
+					})
+				.select(function() {
+					return this.parentNode;
+				})
 				.transition()
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
@@ -200,6 +207,13 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 						return d.data[options.colorKey];
 					}
 					return colors(d.data[options.x.key]);
+				})
+				.append('title')
+					.text(function(d) {
+						return d.data[options.x.key];
+					})
+				.select(function() {
+					return this.parentNode;
 				})
 				.transition('pie-enter')
 				.duration(options.animations.time)
