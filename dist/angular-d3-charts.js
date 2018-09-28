@@ -1297,7 +1297,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.style('stroke-opacity', 0)
 					.style('stroke-width', 0)
 					.attr('d', d3.arc()
-						.outerRadius(options.radius)
+						.outerRadius(options.radius * 0.8)
 					);
 				break;
 			case 1:
@@ -1311,10 +1311,28 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.style('stroke-opacity', 1)
 					.style('stroke-width', 1)
 					.attr('d', d3.arc()
-						.outerRadius(options.radius * 1.06)
+						.outerRadius(options.radius * 0.9)
+					);
+				break;
+			case 2:
+				path
+					.style('stroke', function() {
+						return d3.color(d3.select(this).attr('fill')).darker();
+					})
+					.style('stroke-opacity', 0)
+					.style('stroke-width', 0)
+					.transition('pie-animation')
+					.style('stroke-opacity', 1)
+					.style('stroke-width', 1)
+					.attr('d', d3.arc()
+						.outerRadius(options.radius * 0.9)
 					);
 				break;
 		}
+	};
+
+	var midAngle = function(d) {
+		return d.startAngle + (d.endAngle - d.startAngle)/2;
 	};
 
 	return {
@@ -1326,7 +1344,11 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			var h = options.height - options.margin.top - options.margin.bottom;
 			options.radius = Math.min(w, h) / 2;
 			scope.arc = d3.arc()
-		    .outerRadius(options.radius);
+				.outerRadius(options.radius * 0.8);
+
+			scope.outerArc = d3.arc()
+				.innerRadius(options.radius * 0.9)
+				.outerRadius(options.radius * 0.9);
 
 			scope.pie = d3.pie()
 				.value(function(d) { return d[options.y.key]; })
@@ -1365,6 +1387,70 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 				return _tweenPie(this, scope, options, d3.select(this).data()[0]);
 			};
 
+			var removeTooltip = function() {
+				var lines = d3.select('.a3pie-lines');
+				lines
+					.selectAll('g')
+					.remove();
+
+				return lines;
+			};
+
+			var onTooltip = function(d) {
+				$log.debug('Click on slice');
+				pathAnim(d3.select(this), 1, options);
+				var lines = removeTooltip();
+				var g = lines.append('g');
+				var polyline = g.append('polyline');
+
+				polyline
+					.style('opacity', 0.3)
+					.style('stroke', 'black')
+					.style('stroke-width', '2px')
+					.style('fill', 'none')
+					.transition().duration(1000)
+					.attrTween('points', function() {
+						this._current = this._current || d;
+						var interpolate = d3.interpolate(this._current, d);
+						this._current = interpolate(0);
+
+						return function(t) {
+							var d2 = interpolate(t);
+							var pos = scope.outerArc.centroid(d2);
+							pos[0] = options.radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+							return [scope.arc.centroid(d2), scope.outerArc.centroid(d2), pos];
+						};
+					});
+
+				var text = g.append('text')
+					.attr('dy', '.35em')
+					.text(function() {
+						return d.data[options.x.key];
+					});
+
+				text.transition().duration(1000)
+					.attrTween('transform', function() {
+						this._current = this._current || d;
+						var interpolate = d3.interpolate(this._current, d);
+						this._current = interpolate(0);
+						return function(t) {
+							var d2 = interpolate(t);
+							var pos = scope.outerArc.centroid(d2);
+							pos[0] = options.radius * (midAngle(d2) < Math.PI ? 1 : -1);
+							return 'translate('+ pos +')';
+						};
+					})
+					.styleTween('text-anchor', function(){
+						this._current = this._current || d;
+						var interpolate = d3.interpolate(this._current, d);
+						this._current = interpolate(0);
+						return function(t) {
+							var d2 = interpolate(t);
+							return midAngle(d2) < Math.PI ? 'start':'end';
+						};
+					});
+			};
+
 			//scope.svg.selectAll('.' + scope.classPrefix + '-arc').remove();
 
 			// ===========================================================================================
@@ -1379,23 +1465,20 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			arcs
 				.on('mouseout', null)
 				.on('mouseover', null)
-				.select('title')
-					.text(function(d) {
-						return d.data[options.x.key];
-					})
-				.select(function() {
-					return this.parentNode;
-				})
 				.transition()
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
 				.on('end', function() {
-					d3.select(this).on('mouseover', function() {
-						pathAnim(d3.select(this), 1, options);
-					})
-					.on('mouseout', function() {
-						pathAnim(d3.select(this), 0, options);
-					});
+					d3.select(this)
+						.on('mouseover', function(d) {
+							pathAnim(d3.select(this), 1, options);
+							onTooltip(d);
+						})
+						.on('mouseout', function() {
+							removeTooltip();
+							pathAnim(d3.select(this), 0, options);
+						})
+						.on('click', onTooltip);
 				})
 				.attr('fill', function(d) {
 					if(angular.isDefined(options.colorKey) && angular.isDefined(d.data[options.colorKey])) {
@@ -1422,23 +1505,20 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					}
 					return colors(d.data[options.x.key]);
 				})
-				.append('title')
-					.text(function(d) {
-						return d.data[options.x.key];
-					})
-				.select(function() {
-					return this.parentNode;
-				})
 				.transition('pie-enter')
 				.duration(options.animations.time)
 				.ease(options.animations.ease)
 				.on('end', function() {
-					d3.select(this).on('mouseover', function() {
-						pathAnim(d3.select(this), 1, options);
-					})
-					.on('mouseout', function() {
-						pathAnim(d3.select(this), 0, options);
-					});
+					d3.select(this)
+						.on('mouseover', function(d) {
+							pathAnim(d3.select(this), 1, options);
+							onTooltip(d);
+						})
+						.on('mouseout', function() {
+							removeTooltip();
+							pathAnim(d3.select(this), 0, options);
+						})
+						.on('click', onTooltip);
 				})
 				.attrTween('d', arcTween);
 
