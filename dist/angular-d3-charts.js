@@ -340,7 +340,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 		},
 
 		setColors: function(userColors, defaultColors) {
-			var colors = defaultColors || d3.scaleOrdinal(d3.schemeCategory20);
+			var colors = defaultColors || d3.scaleOrdinal(d3.schemePaired);
 			if(this.isDefined(userColors)) {
 				colors = this.isArray(userColors)? d3.scaleOrdinal().range(userColors):colors;
 				colors = this.isString(userColors)? d3.scaleOrdinal().range([userColors]):colors;
@@ -402,7 +402,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scaleOrdinal(d3.schemeCategory20),
+				colors: d3.scaleOrdinal(d3.schemePaired),
 				subcolors: null,
 				// Possible Values [d3.interpolateRgb, d3.interpolateHsl, d3.interpolateLab, d3.interpolateHcl]
 				colorInterpolator: null
@@ -517,7 +517,7 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
 			pie: {
-				colors: d3.scaleOrdinal(d3.schemeCategory20)
+				colors: d3.scaleOrdinal(d3.schemePaired)
 			},
 			radius: 0,
 			x: {

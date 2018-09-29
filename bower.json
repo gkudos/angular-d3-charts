@@ -9,12 +9,12 @@
   "main": "dist/angular-d3-charts.min.js",
   "dependencies": {
     "jquery": "3.2.x",
-    "angular": "1.6.x",
-    "d3": "4.10.x"
+    "angular": "1.7.x",
+    "d3": "5.7.x"
   },
   "devDependencies": {
     "bootstrap": "3.3.x",
-    "angular-mocks": "1.6.x"
+    "angular-mocks": "1.7.x"
   },
   "keywords": [
     "angular",

@@ -3,7 +3,7 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 		var commonDefaults = d3Helpers.getCommonDefaults();
 		angular.extend(commonDefaults, {
 			pie: {
-				colors: d3.scaleOrdinal(d3.schemeCategory20)
+				colors: d3.scaleOrdinal(d3.schemePaired)
 			},
 			radius: 0,
 			x: {

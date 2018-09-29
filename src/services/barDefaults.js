@@ -6,7 +6,7 @@ angular.module('angular-d3-charts').factory('barDefaults', function (d3Helpers) 
 			bar: {
 				gap: 0.2,
 				path: null,
-				colors: d3.scaleOrdinal(d3.schemeCategory20),
+				colors: d3.scaleOrdinal(d3.schemePaired),
 				subcolors: null,
 				// Possible Values [d3.interpolateRgb, d3.interpolateHsl, d3.interpolateLab, d3.interpolateHcl]
 				colorInterpolator: null
