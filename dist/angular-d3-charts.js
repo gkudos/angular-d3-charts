@@ -1388,7 +1388,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			};
 
 			var removeTooltip = function() {
-				var lines = d3.select('.a3pie-lines');
+				var lines = scope.svg.select('.a3pie-lines');
 				lines
 					.selectAll('g')
 					.remove();
@@ -1397,7 +1397,6 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			};
 
 			var onTooltip = function(d) {
-				$log.debug('Click on slice');
 				pathAnim(d3.select(this), 1, options);
 				var lines = removeTooltip();
 				var g = lines.append('g');
