@@ -34,7 +34,9 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			},
 			legend: {
 				show: true,
-				width: 120
+				size: 120,
+				type: 'vertical',
+				gap: 20
 			},
 			timeFormat: '%d-%m-%Y',
 			fontFamily: 'Arial',

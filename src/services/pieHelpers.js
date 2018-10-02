@@ -83,7 +83,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.style('stroke-opacity', 0)
 					.style('stroke-width', 0)
 					.attr('d', d3.arc()
-						.outerRadius(options.radius * 0.8)
+						.outerRadius(options.radius * 0.9)
 					);
 				break;
 			case 1:
@@ -97,7 +97,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.style('stroke-opacity', 1)
 					.style('stroke-width', 1)
 					.attr('d', d3.arc()
-						.outerRadius(options.radius * 0.9)
+						.outerRadius(options.radius * 0.95)
 					);
 				break;
 			case 2:
@@ -111,7 +111,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					.style('stroke-opacity', 1)
 					.style('stroke-width', 1)
 					.attr('d', d3.arc()
-						.outerRadius(options.radius * 0.9)
+						.outerRadius(options.radius * 0.95)
 					);
 				break;
 		}
@@ -124,17 +124,17 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 	return {
 		addArc: function(scope, options) {
 			var w = options.width - options.margin.left - options.margin.right;
-			if(options.legend.show) {
-				w -= options.legend.width;
+			if(options.legend.show && options.legend.type === 'vertical') {
+				w -= options.legend.size;
 			}
 			var h = options.height - options.margin.top - options.margin.bottom;
 			options.radius = Math.min(w, h) / 2;
 			scope.arc = d3.arc()
-				.outerRadius(options.radius * 0.8);
+				.outerRadius(options.radius * 0.9);
 
 			scope.outerArc = d3.arc()
-				.innerRadius(options.radius * 0.9)
-				.outerRadius(options.radius * 0.9);
+				.innerRadius(options.radius * 1)
+				.outerRadius(options.radius * 1);
 
 			scope.pie = d3.pie()
 				.value(function(d) { return d[options.y.key]; })
@@ -330,7 +330,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			this.setStyles(scope, options);
 
-			if(options.legend.show) {
+			if(options.legend.show && options.legend.type === 'vertical') {
 				this.createLegend(scope, options, colors);
 			}
 		},
@@ -353,7 +353,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 
 			if(!scope.legend) {
-				var left = options.radius*1.1;
+				var left = options.radius + options.legend.gap;
 				var top = -options.radius*0.9;
 				scope.legend = scope.svg
 					.append('g')
@@ -372,7 +372,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return d[options.x.key] + ' (' + percentFormat(d[options.y.key]/total) + ')';
 				})
 				.each(function() {
-					svgHelpers.wrap(this, options.legend.width - 20);
+					svgHelpers.wrap(this, options.legend.size - 20);
 				});
 
 			items
@@ -410,7 +410,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return d[options.x.key] + ' (' + percentFormat(d[options.y.key]/total) + ')';
 				})
 				.each(function() {
-					svgHelpers.wrap(this, options.legend.width - 20);
+					svgHelpers.wrap(this, options.legend.size - 20);
 				});
 
 			items

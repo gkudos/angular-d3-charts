@@ -2,10 +2,16 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 	return {
 		/**
 		 * Add SVG element to DOM.
+		 *
+		 * @param {Object} scope Pie scope.
+		 * @param {Element} container Container from SVG.
+		 * @param {Object} options Pie option.
+		 *
+		 * @returns {SVGElement} SVG Element for Pie.
 		 */
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
-			w += options.legend.show? options.legend.width:0;
+			w += options.legend.show? (options.legend.size + options.legend.gap):0;
 			var h = options.height + options.margin.top + options.margin.bottom + (options.axis.show? 30:0);
 
 			options.containerWidth = w;

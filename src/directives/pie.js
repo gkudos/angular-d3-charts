@@ -24,7 +24,7 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 
 			svgHelpers.addSVG(scope, element.get(0), options);
 			var w = options.width + options.margin.left + options.margin.right;
-			w -= options.legend.show? options.legend.width:0;
+			w -= options.legend.show && options.legend.type === 'vertical'? options.legend.size:0;
 			scope.svg.attr('transform', 'translate(' + w / 2 + ',' + options.height / 2 + ')');
 
 			element.width(options.containerWidth);
