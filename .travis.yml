@@ -3,6 +3,8 @@ node_js:
   - "node"
 env:
   - CXX=g++-4.8
+before_script:
+	- npm install -g bower
 addons:
   apt:
     sources:
