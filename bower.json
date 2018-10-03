@@ -6,7 +6,7 @@
     "Michael Salgado <elesdoar@gmail.com>"
   ],
   "description": "Angular directives with D3 charts.",
-  "main": "dist/angular-d3-charts.min.js",
+  "main": "dist/angular-d3-charts.js",
   "dependencies": {
     "jquery": "3.2.x",
     "angular": "1.7.x",
