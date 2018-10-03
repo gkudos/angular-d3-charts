@@ -225,33 +225,23 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 				var text = g.append('text')
 					.attr('dy', '.35em')
-					.text(function() {
+					.html(function() {
 						return d.data[options.x.key];
 					});
 
-				text.transition().duration(1000)
-					.attrTween('transform', function() {
+				text
+					.attr('transform', function() {
 						this._current = this._current || d;
-						var interpolate = d3.interpolate(this._current, d);
-						this._current = interpolate(0);
-						return function(t) {
-							var d2 = interpolate(t);
-							var pos = scope.outerArc.centroid(d2);
-							pos[0] = options.radius * (midAngle(d2) < Math.PI ? 1 : -1);
-							return 'translate('+ pos +')';
-						};
+						var pos = scope.outerArc.centroid(this._current);
+						pos[0] = options.radius * (midAngle(this._current) < Math.PI ? 1 : -1);
+						return 'translate('+ pos +')';
 					})
-					.styleTween('text-anchor', function(){
+					.style('text-anchor', function(){
 						this._current = this._current || d;
-						var interpolate = d3.interpolate(this._current, d);
-						this._current = interpolate(0);
-						return function(t) {
-							var d2 = interpolate(t);
-							return midAngle(d2) < Math.PI ? 'start':'end';
-						};
+						return midAngle(this._current) < Math.PI ? 'start':'end';
 					})
-					.on('end', function() {
-						_wrapLabels(scope, options);
+					.each(function() {
+						svgHelpers.wrap(this, options.tooltipSize);
 					});
 			};
 
@@ -462,8 +452,6 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 						currentY += clientRect.height + 5;
 						iy++;
 					} else {
-						$log.debug('Client Rect:', clientRect);
-
 						if(currentX + clientRect.width > options.containerWidth) {
 							currentX = 0;
 							oldX = 0;
@@ -475,6 +463,23 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					}
 					return 'translate(' + oldX + ', ' + oldY + ')';
 				});
+
+			var legendRect = scope.legend.node().getBoundingClientRect();
+			if(scope.container) {
+				$log.debug('SVG:', scope.svg.node().parentNode);
+				var svg = d3.select(scope.svg.node().parentNode);
+				if(legendRect.bottom > options.containerHeight) {
+					d3.selectAll(scope.container)
+						.style('height', legendRect.bottom + 'px');
+
+					svg.attr('height', legendRect.bottom);
+				} else {
+					d3.selectAll(scope.container)
+						.style('height', options.containerHeight + 'px');
+
+					svg.attr('height', options.containerHeight);
+				}
+			}
 		},
 
 		wrapLabels: _wrapLabels,

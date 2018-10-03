@@ -41,6 +41,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 			timeFormat: '%d-%m-%Y',
 			fontFamily: 'Arial',
 			fontSize: '0.75em',
+			tooltipSize: 120,
 			axis: {
 				show: true,
 				stroke: '#000',
@@ -127,6 +128,7 @@ angular.module('angular-d3-charts').factory('d3Helpers', function ($log) {
 				newDefaults.timeFormat = this.isDefined(userDefaults.timeFormat) ?  userDefaults.timeFormat : newDefaults.timeFormat;
 				newDefaults.fontFamily = this.isDefined(userDefaults.fontFamily) ?  userDefaults.fontFamily : newDefaults.fontFamily;
 				newDefaults.fontSize = this.isDefined(userDefaults.fontSize) ?  userDefaults.fontSize : newDefaults.fontSize;
+				newDefaults.tooltipSize = this.isDefined(userDefaults.tooltipSize) ?  userDefaults.tooltipSize : newDefaults.tooltipSize;
 				newDefaults.showDefaultData = this.isDefined(userDefaults.showDefaultData) ?  userDefaults.showDefaultData : newDefaults.showDefaultData;
 				newDefaults.locale = this.isDefined(userDefaults.locale) ?  userDefaults.locale : newDefaults.locale;
 
