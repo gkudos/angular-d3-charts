@@ -464,20 +464,20 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return 'translate(' + oldX + ', ' + oldY + ')';
 				});
 
-			var legendRect = scope.legend.node().getBoundingClientRect();
+			var legendNode = scope.legend.node();
+			var svgBBox = scope.svg.node().getBBox();
+			//var legendRect = legendNode.getBoundingClientRect();
+
+			$log.debug('BBoxes:', svgBBox, legendNode.getBBox());
+
 			if(scope.container) {
 				var svg = d3.select(scope.svg.node().parentNode);
-				if(legendRect.bottom > options.containerHeight) {
-					d3.selectAll(scope.container)
-						.style('height', legendRect.bottom + 'px');
+				var height = svgBBox.height + options.margin.bottom +
+					options.height/2 + svgBBox.y;
 
-					svg.attr('height', legendRect.bottom);
-				} else {
-					d3.selectAll(scope.container)
-						.style('height', options.containerHeight + 'px');
-
-					svg.attr('height', options.containerHeight);
-				}
+				height = Math.max(height, options.containerHeight);
+				d3.selectAll(scope.container).style('height', height + 'px');
+				svg.attr('height', height);
 			}
 		},
 
