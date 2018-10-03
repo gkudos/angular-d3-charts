@@ -87,6 +87,10 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 			var pieId = obtainEffectiveChartId(defaults, scopeId);
 			defaults[pieId] = newDefaults;
 			return newDefaults;
+		},
+
+		obtainEffectiveChartId: function(scopeId) {
+			return obtainEffectiveChartId(defaults, scopeId);
 		}
 	};
 });

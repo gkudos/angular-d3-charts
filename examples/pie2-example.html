@@ -7,13 +7,24 @@
 		<script src="../dist/angular-d3-charts.js"></script>
 		<script>
 				var app = angular.module("demoapp", ['angular-d3-charts']);
-				app.controller("DemoController", [ "$scope", "$http", "$log", function($scope, $http, $log) {
+				app.controller("DemoController", [
+						"$scope", "$http", "$timeout", "$log", function($scope, $http, $timeout, $log) {
 						var file = 'data/pie2.json';
 						angular.extend($scope, {
+							showPie: false,
+							togglePie: function() {
+								$scope.showPie = !$scope.showPie;
+
+								$timeout(function() {
+									if($scope.showPie) {
+										$scope.$broadcast('a3pie:redraw-pie');
+									}
+								}, 100);
+							},
 							options: {
 								innerRadius: 10,
 					      showPercent: true,
-					      pieAnimation: 'normal',
+								pieAnimation: 'normal',
 					      x: {
 					        key: 'label',
 					        show: false
@@ -57,7 +68,9 @@
 		</script>
 	</head>
 	<body ng-controller="DemoController">
-		<a3pie width="500px" height="300px" options="options" data="values"></a3pie>
+		<a3pie id="pie" width="500px" height="300px" options="options" data="values"
+			ng-show="showPie"></a3pie>
 		<button ng-click="changeValues()">Change Values</button>
+		<button ng-click="togglePie()">Toggle Pie</button>
 	</body>
 </html>

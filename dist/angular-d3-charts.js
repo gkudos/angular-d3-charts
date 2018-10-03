@@ -132,6 +132,10 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			scope.$watch('data', function() {
 				pieHelpers.updateData(scope, options);
 			});
+
+			scope.$on('a3pie:redraw-' + pieDefaults.obtainEffectiveChartId(attrs.id), function() {
+				pieHelpers.createLegend(scope, options, d3Helpers.setColors(options.pie.colors));
+			});
 		}
 	};
 });
@@ -603,6 +607,10 @@ angular.module('angular-d3-charts').factory('pieDefaults', function (d3Helpers) 
 			var pieId = obtainEffectiveChartId(defaults, scopeId);
 			defaults[pieId] = newDefaults;
 			return newDefaults;
+		},
+
+		obtainEffectiveChartId: function(scopeId) {
+			return obtainEffectiveChartId(defaults, scopeId);
 		}
 	};
 });
@@ -1682,7 +1690,6 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			var legendRect = scope.legend.node().getBoundingClientRect();
 			if(scope.container) {
-				$log.debug('SVG:', scope.svg.node().parentNode);
 				var svg = d3.select(scope.svg.node().parentNode);
 				if(legendRect.bottom > options.containerHeight) {
 					d3.selectAll(scope.container)

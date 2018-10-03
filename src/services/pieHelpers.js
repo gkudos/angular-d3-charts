@@ -466,7 +466,6 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			var legendRect = scope.legend.node().getBoundingClientRect();
 			if(scope.container) {
-				$log.debug('SVG:', scope.svg.node().parentNode);
 				var svg = d3.select(scope.svg.node().parentNode);
 				if(legendRect.bottom > options.containerHeight) {
 					d3.selectAll(scope.container)
