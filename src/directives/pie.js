@@ -27,8 +27,6 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			w -= options.legend.show && options.legend.type === 'vertical'? options.legend.size:0;
 			scope.svg.attr('transform', 'translate(' + w / 2 + ',' + options.height / 2 + ')');
 
-			element.width(options.containerWidth);
-
 			pieHelpers.addArc(scope, options);
 			//svgHelpers.updateStyles(scope, options);
 

@@ -124,8 +124,6 @@ angular.module('angular-d3-charts').directive('a3pie', function ($log, d3Helpers
 			w -= options.legend.show && options.legend.type === 'vertical'? options.legend.size:0;
 			scope.svg.attr('transform', 'translate(' + w / 2 + ',' + options.height / 2 + ')');
 
-			element.width(options.containerWidth);
-
 			pieHelpers.addArc(scope, options);
 			//svgHelpers.updateStyles(scope, options);
 
@@ -1337,6 +1335,18 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 		return d.startAngle + (d.endAngle - d.startAngle)/2;
 	};
 
+	var _wrapLabels = function(scope, options) {
+		scope.svg.selectAll('.' + scope.classPrefix + '-lines g text')
+			.each(function() {
+				var rect = this.parentNode.getBoundingClientRect();
+				if(rect.left < 0) {
+					svgHelpers.wrap(this, rect.right);
+				} else if(rect.right > options.width) {
+					svgHelpers.wrap(this, options.width - rect.left);
+				}
+			});
+	};
+
 	return {
 		addArc: function(scope, options) {
 			var w = options.width - options.margin.left - options.margin.right;
@@ -1369,6 +1379,10 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 			// var percentFormat = d3.format(',.2%');
 			var colors = d3Helpers.setColors(options.pie.colors);
 			var data = d3Helpers.getDataFromScope(scope, options);
+			data = data.filter(function(d) {
+				return d3Helpers.isDefined(d[options.y.key]) && !isNaN(d[options.y.key]);
+			});
+
 			if(d3Helpers.isUndefinedOrEmpty(data)) {
 				$log.warn('[Angular - D3] No data for pie');
 				return;
@@ -1449,6 +1463,9 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 							var d2 = interpolate(t);
 							return midAngle(d2) < Math.PI ? 'start':'end';
 						};
+					})
+					.on('end', function() {
+						_wrapLabels(scope, options);
 					});
 			};
 
@@ -1546,7 +1563,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			this.setStyles(scope, options);
 
-			if(options.legend.show && options.legend.type === 'vertical') {
+			if(options.legend.show) {
 				this.createLegend(scope, options, colors);
 			}
 		},
@@ -1569,8 +1586,15 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 
 			if(!scope.legend) {
-				var left = options.radius + options.legend.gap;
-				var top = -options.radius*0.9;
+				var left;
+				var top;
+				if(options.legend.type === 'vertical') {
+					left = options.radius + options.legend.gap;
+					top = -options.radius*0.9;
+				} else {
+					left = -options.containerWidth/2 + options.margin.left;
+					top = options.radius + options.legend.gap;
+				}
 				scope.legend = scope.svg
 					.append('g')
 					.attr('class', 'legend')
@@ -1588,7 +1612,9 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return d[options.x.key] + ' (' + percentFormat(d[options.y.key]/total) + ')';
 				})
 				.each(function() {
-					svgHelpers.wrap(this, options.legend.size - 20);
+					if(options.legend.type === 'vertical') {
+						svgHelpers.wrap(this, options.legend.size - 20);
+					}
 				});
 
 			items
@@ -1600,10 +1626,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			var item = items.enter()
 				.append('g')
-				.attr('class', 'legend-item')
-				.attr('transform', function(d, i) {
-					return 'translate(0, ' + (i*25) + ')';
-				});
+				.attr('class', 'legend-item');
 
 			item
 				.append('rect')
@@ -1617,7 +1640,7 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 
 			item
 				.append('text')
-				.attr('x', '25px')
+				// .attr('x', '25px')
 				.attr('y', 0)
 				.attr('dy', '0')
 				.attr('dx', '25px')
@@ -1626,35 +1649,49 @@ angular.module('angular-d3-charts').factory('pieHelpers', function ($log, d3Help
 					return d[options.x.key] + ' (' + percentFormat(d[options.y.key]/total) + ')';
 				})
 				.each(function() {
-					svgHelpers.wrap(this, options.legend.size - 20);
+					if(options.legend.type === 'vertical') {
+						svgHelpers.wrap(this, options.legend.size - 20);
+					}
 				});
 
 			items
 				.exit()
 				.remove();
 
-			var currentY = 0;
+			var currentX = 0;
+			var currentY = 0, iy = 0;
 			scope.legend
 				.selectAll('.legend-item')
-				.attr('transform', function(d, i) {
-					var oldY = Math.max(currentY, 20*i);
-					currentY += d3.select(this).select('text').node().getBoundingClientRect().height + 10;
+				.attr('transform', function() {
+					var oldY = Math.max(currentY, 25*iy);
+					var oldX = currentX;
 
-					return 'translate(0, ' + oldY + ')';
-				});
-		},
+					var clientRect =
+						d3.select(this)
+							//.select('text')
+							.node()
+							.getBoundingClientRect();
 
-		wrapLabels: function(scope, options) {
-			scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
-				.each(function() {
-					var rect = this.getBoundingClientRect();
-					if(rect.left < 0) {
-						svgHelpers.wrap(this, rect.right);
-					} else if(rect.right > options.width) {
-						svgHelpers.wrap(this, options.width - rect.left);
+					if(options.legend.type === 'vertical') {
+						currentY += clientRect.height + 5;
+						iy++;
+					} else {
+						$log.debug('Client Rect:', clientRect);
+
+						if(currentX + clientRect.width > options.containerWidth) {
+							currentX = 0;
+							oldX = 0;
+							iy++;
+							oldY = Math.max(currentY, 25*iy);
+						}
+
+						currentX += clientRect.width + 10;
 					}
+					return 'translate(' + oldX + ', ' + oldY + ')';
 				});
 		},
+
+		wrapLabels: _wrapLabels,
 
 		setStyles: function(scope, options) {
 			scope.svg.selectAll('.' + scope.classPrefix + '-labelName text')
@@ -1689,20 +1726,23 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 		/**
 		 * Add SVG element to DOM.
 		 *
-		 * @param {Object} scope Pie scope.
+		 * @param {Object} scope Chart scope.
 		 * @param {Element} container Container from SVG.
-		 * @param {Object} options Pie option.
+		 * @param {Object} options Chart options.
 		 *
 		 * @returns {SVGElement} SVG Element for Pie.
 		 */
 		addSVG: function(scope, container, options) {
 			var w = options.width + options.margin.left + options.margin.right;
-			w += options.legend.show? (options.legend.size + options.legend.gap):0;
+			w += (options.legend.show && options.legend.type === 'vertical')?
+				(options.legend.size + options.legend.gap):0;
 			var h = options.height + options.margin.top + options.margin.bottom + (options.axis.show? 30:0);
 
 			options.containerWidth = w;
 			options.containerHeight = h;
 			var svg = d3.select(container)
+				.style('width', w + 'px')
+				.style('height', h + 'px')
 				.append('svg')
 				.attr('width', w)
 				.attr('height', h)
@@ -1990,3 +2030,4 @@ angular.module('angular-d3-charts').factory('svgHelpers', function ($log, d3Help
 });
 
 }());
+//# sourceMappingURL=angular-d3-charts.js.map
