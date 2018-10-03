@@ -3,15 +3,13 @@
 /*jshint -W117 */
 /*jshint globalstrict: true*/
 describe('Directive a3pie', function() {
-	var $compile, $rootScope, $timeout, barDefaults, scope;
+	var $compile, $rootScope, scope;
 	var directive = '<a3pie></a3pie>';
 
 	beforeEach(module('angular-d3-charts'));
-	beforeEach(inject(function(_$compile_, _$rootScope_, _$timeout_, _barDefaults_) {
+	beforeEach(inject(function(_$compile_, _$rootScope_) {
 		$compile = _$compile_;
 		$rootScope = _$rootScope_;
-		$timeout = _$timeout_;
-		barDefaults = _barDefaults_;
 		scope = $rootScope.$new();
 	}));
 
