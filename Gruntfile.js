@@ -36,7 +36,8 @@ module.exports = function(grunt) {
       options: {
         banner: '(function() {\n\n"use strict";\n\n',
         footer: '\n}());',
-        stripBanners: true
+				stripBanners: true,
+				sourceMap: true
       },
       dist: {
         src: [
@@ -102,7 +103,10 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         banner: '<%= banner %>',
-        report: 'gzip'
+				report: 'gzip',
+				sourceMap: {
+          includeSources: true
+				}
       },
       dist: {
         src: '<%= concat.dist.dest %>',
